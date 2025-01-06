@@ -85,4 +85,13 @@ router.get("/:userId/properties", async (req, res) => {
     }
   });
 
+  router.get('/:userId', async (req, res) => {
+    try {
+      const user = await User.findById(req.params.userId);
+      if (!user) return res.status(404).send({ error: "User not found" });
+      res.json({ name: user.firstname });
+    } catch (err) {
+      res.status(500).send({ error: "Server error" });
+    }
+  });
 module.exports = router;

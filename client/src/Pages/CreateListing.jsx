@@ -9,25 +9,32 @@ import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { BiTrash } from "react-icons/bi";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+ 
 import Footer from "../components/Footer";
+
 
 const CreateListing = () => {
   const [category, setCategory] = useState("");
   const [type, setType] = useState("");
 
-  const [formLocation, setFormLocatin] = useState({
+  const [formLocation, setFormLocation] = useState({
     streetAddress: "",
     aptSuit: "",
     city: "",
     province: "",
     country: "",
+    latitude: null, // Add latitude
+    longitude: null, // Add longitude
   });
 
   const [photos, setPhotos] = useState([]);
 
   const handleChangeLocation = (e) => {
     const { name, value } = e.target;
-    setFormLocatin({
+    setFormLocation({
       ...formLocation,
       [name]: value,
     });
@@ -70,6 +77,29 @@ const CreateListing = () => {
     );
   };
 
+  const markerIcon = new L.Icon({
+    iconUrl: '../assets/marker.png', // Provide a path to your marker icon image
+    iconSize: [32, 32], // Set the size of the icon
+    iconAnchor: [16, 32], // Anchor the icon to the bottom center
+    popupAnchor: [0, -32], // Set the popup anchor position
+  });
+
+  const LocationPicker = ({ setFormLocation }) => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setFormLocation((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+        }));
+      },
+    });
+    return null;
+  };
+  
+  
+
   const [formDescription, setFormDescription] = useState({
     title: "",
     description: "",
@@ -77,7 +107,6 @@ const CreateListing = () => {
     highlightdescription: "",
     price: 0,
   });
-
   const handleChangeDescription = (e) => {
     const { name, value } = e.target;
     setFormDescription({
@@ -85,6 +114,7 @@ const CreateListing = () => {
       [name]: value,
     });
   };
+  
 
   const creatorId = useSelector((state) => state.user._id);
   const navigate = useNavigate();
@@ -112,6 +142,8 @@ const CreateListing = () => {
       listingForm.append("title", formDescription.title);
       listingForm.append("description", formDescription.description);
       listingForm.append("highlight", formDescription.highlight);
+      listingForm.append("latitude", formLocation.latitude);
+       listingForm.append("longitude", formLocation.longitude);
       listingForm.append(
         "highlightdescription",
         formDescription.highlightdescription
@@ -139,10 +171,35 @@ const CreateListing = () => {
     <>
       <Navbar />
       <h1>Publish Your Place</h1>
+       
+
       <div className="create-listing">
         <form onSubmit={handlePost}>
           <div className="create-listing_step1">
             <h2>Step 1: Tell us about your place</h2>
+            <div className="map-section">
+  <h4>Click on the map to select your location</h4>
+  <MapContainer
+    center={[23.8103, 90.4125]} // Center on Dhaka
+    zoom={13}
+    scrollWheelZoom={false}
+    style={{ height: "300px", width: "100%" }}
+  >
+    <TileLayer
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      attribution="&copy; OpenStreetMap contributors"
+    />
+    <LocationPicker setFormLocation={setFormLocation} />
+    {formLocation.latitude && formLocation.longitude && (
+      <Marker
+        position={[formLocation.latitude, formLocation.longitude]}
+        icon={markerIcon}
+      />
+    )}
+  </MapContainer>
+</div>
+
+
             <hr />
             <h3>Which of these categories best describes your place?</h3>
             <div className="category-list">

@@ -6,11 +6,11 @@ import "../styles/Categories.scss";
 const Categories = () => {
   return (
     <div className="categories">
-      <h1>Explore Top Categories</h1>
+      <h1>Explore Top Houses</h1>
       <p>
-        Explore our wide range of Dhaka rentals that cater to all types of
-        travelers. Immerse yourself in your favorite area, enjoy the comfort of
-        home, and create unforgettable memories in your dream places.
+      Explore our diverse selection of Dhaka rentals, perfect for all types of 
+      travelers. Enjoy the comforts of home in vibrant neighborhoods
+       and create unforgettable memories in your dream getaway!
       </p>
       <div className="categories_list">
         {categories?.slice(1, 7).map((category, index) => (

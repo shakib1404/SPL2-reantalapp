@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import "../styles/ListingDetails.scss";
-import {useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { facilities } from "../data";
-
-//import { Calender } from "react-date-range";
-
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { DateRange } from "react-date-range";
@@ -12,11 +9,15 @@ import Loader from "../components/Loader";
 import Navbar from "../components/Navbar";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
-//import Footer from "../components/Footer"
+import { Link } from "react-router-dom";
+
+// Importing Leaflet and React-Leaflet components
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { Icon } from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const ListingDetails = () => {
   const [loading, setLoading] = useState(true);
-
   const { listingId } = useParams();
   const [listing, setListing] = useState(null);
 
@@ -30,8 +31,6 @@ const ListingDetails = () => {
         }
       );
 
-      // console.log(listingId);
-
       const data = await response.json();
       setListing(data);
       setLoading(false);
@@ -43,8 +42,6 @@ const ListingDetails = () => {
   useEffect(() => {
     getListingDetails();
   }, []);
-
-  //console.log(listing);
 
   /* BOOKING CALENDAR */
   const [dateRange, setDateRange] = useState([
@@ -60,16 +57,15 @@ const ListingDetails = () => {
     setDateRange([ranges.selection]);
   };
 
-
-
   const start = new Date(dateRange[0].startDate);
   const end = new Date(dateRange[0].endDate);
   const dayCount = Math.round(end - start) / (1000 * 60 * 60 * 24); // Calculate the difference in day unit
 
   /* SUBMIT BOOKING */
   const customerId = useSelector((state) => state?.user?._id);
+  const currentUserRole = useSelector((state) => state?.user?.role); // Assuming 'renter' or 'landlord'
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
@@ -80,30 +76,35 @@ const ListingDetails = () => {
         startDate: dateRange[0].startDate.toDateString(),
         endDate: dateRange[0].endDate.toDateString(),
         totalPrice: listing.price * dayCount,
-      }
+      };
 
       const response = await fetch("http://localhost:3001/bookings/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(bookingForm)
-      })
+        body: JSON.stringify(bookingForm),
+      });
 
       if (response.ok) {
-        navigate(`/${customerId}/trips`)
+        navigate(`/${customerId}/trips`);
       }
     } catch (err) {
-      console.log("Submit Booking Failed.", err.message)
+      console.log("Submit Booking Failed.", err.message);
     }
-  }
+  };
 
+  // Handle chat button click for both renter and landlord
+  const handleChatClick = () => {
+    // Navigate to the chat window for the listing
+    navigate(`/chat/${listingId}`);
+  };
 
   return loading ? (
     <Loader />
   ) : (
     <>
-    <Navbar/>
+      <Navbar />
       <div className="listing-details">
         <div className="title">
           <h1>{listing.title}</h1>
@@ -150,6 +151,35 @@ const ListingDetails = () => {
         <p>{listing.highlightdescription}</p>
         <hr />
 
+        {/* Location with Leaflet Map */}
+        {listing.latitude && listing.longitude && (
+          <div className="location">
+            <h3>Location</h3>
+            {/* Full Map with Marker */}
+            <MapContainer
+              center={[listing.latitude, listing.longitude]}
+              zoom={13}
+              style={{ height: "400px", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker
+                position={[listing.latitude, listing.longitude]}
+                icon={
+                  new Icon({
+                    iconUrl: "../assets/marker.png",
+                    iconSize: [25, 25], // Icon size
+                  })
+                }
+              >
+                <Popup>{listing.title}</Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        )}
+
         <div className="booking">
           <div>
             <h2>What this place offers?</h2>
@@ -167,7 +197,7 @@ const ListingDetails = () => {
               ))}
             </div>
           </div>
-            <hr/>
+          <hr />
           <div>
             <h2>How long do you want to stay?</h2>
             <div className="date-range-calendar">
@@ -192,8 +222,25 @@ const ListingDetails = () => {
             </div>
           </div>
         </div>
+
+        {/* Chat Button */}
+        {currentUserRole !== "landlord" && (
+          <div className="chat-button-container">
+            <button className="button" onClick={handleChatClick}>
+              Chat with Host
+            </button>
+          </div>
+        )}
+
+        {currentUserRole === "landlord" && (
+          <div className="chat-button-container">
+            <button className="button" onClick={handleChatClick}>
+              View Messages
+            </button>
+          </div>
+        )}
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

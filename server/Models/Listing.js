@@ -100,6 +100,15 @@ const ListingSchema=new mongoose.Schema(
         required:true
     },
 
+    latitude: {
+        type: Number,
+        required: true,  // Ensure this is required if location data is necessary
+      },
+      longitude: {
+        type: Number,
+        required: true,  // Ensure this is required if location data is necessary
+      },
+
     },
     {timestamps:true}
 )

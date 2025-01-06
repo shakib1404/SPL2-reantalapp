@@ -33,7 +33,7 @@ const TripList = () => {
   ) : (
     <>
       <Navbar />
-      <h1 className="title-list">Your Trip List</h1>
+      <h1 className="title-list">Your Previous Rental</h1>
       <div className="list">
         {tripList?.map(({listingId,customerId,startDate,endDate,totalPrice,booking=true})=>(
          <ListingCard

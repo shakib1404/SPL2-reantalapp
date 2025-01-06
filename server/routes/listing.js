@@ -17,10 +17,10 @@ router.post("/create", upload.array("listingPhotos"), async (req, res) => {
   try {
     const {
       creator,
-      category, // Corrected spelling here
+      category,
       type,
       streetAddress,
-      aptSuit, // Corrected spelling here
+      aptSuit,
       city,
       province,
       country,
@@ -34,6 +34,8 @@ router.post("/create", upload.array("listingPhotos"), async (req, res) => {
       highlight,
       highlightdescription,
       price,
+      latitude, // Include latitude
+      longitude, // Include longitude
     } = req.body;
 
     const listingPhotos = req.files;
@@ -64,6 +66,8 @@ router.post("/create", upload.array("listingPhotos"), async (req, res) => {
       highlight,
       highlightdescription,
       price,
+      latitude, // Store latitude
+      longitude, // Store longitude
     });
 
     await newListing.save();
@@ -91,54 +95,38 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/search/:search",async(req,res)=>
-{
-  const {search}=req.params
+router.get("/search/:search", async (req, res) => {
+  const { search } = req.params;
   try {
-    let listings=[]
+    let listings = [];
 
-    if(search==="all")
-    {
-      listings=await Listing.find().populate("creator")
+    if (search === "all") {
+      listings = await Listing.find().populate("creator");
+    } else {
+      listings = await Listing.find({
+        $or: [
+          { category: { $regex: search, $options: "i" } },
+          { title: { $regex: search, $options: "i" } },
+        ],
+      }).populate("creator");
     }
-    else{
-      listings=await Listing.find({
-        $or:[
-          {category:{$regex:search,$options:"i"}},
-          {title:{$regex:search,$options:"i"}},
-        ]
-      }).populate("creator")
-    }
-    res.status(200).json(listings)
+    res.status(200).json(listings);
   } catch (err) {
     res.status(404).json({ message: "Fail to fetch Listing", error: err.message });
     console.log(err);
-    
   }
-})
+});
 
-
-
-
-router.get("/:listingId",async(req,res)=>{
+router.get("/:listingId", async (req, res) => {
   try {
-     const {listingId}=req.params 
-     console.log(listingId)
-    // const listing=await Listing.findById(listingId)
-     const listing = await Listing.findById(listingId).populate('creator', 'firstname lastname profileimagePath'); // Select only the required fields
+    const { listingId } = req.params;
+    console.log(listingId);
+    const listing = await Listing.findById(listingId).populate('creator', 'firstname lastname profileimagePath'); // Select only the required fields
 
-
-     res.status(202).json(listing)
-    // res.status(202).json(listing2)
-
+    res.status(202).json(listing);
   } catch (err) {
-    res.status(404).json({message:"Listing can not found",error:err.message})
+    res.status(404).json({ message: "Listing can not be found", error: err.message });
   }
-})
-
-
+});
 
 module.exports = router;
-
-//router.get("/:listingId")
- 

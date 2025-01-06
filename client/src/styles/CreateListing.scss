@@ -13,6 +13,18 @@
     color: $blue;
   }
 
+  map-section {
+    margin-top: 20px;
+  
+    &leaflet-container {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      height: 300px;
+      width: 100%;
+    }
+  }
+  
+
   &_step1 {
     background-color: white;
     padding: 30px 40px;

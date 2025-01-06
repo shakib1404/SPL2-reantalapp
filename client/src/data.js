@@ -51,96 +51,95 @@ export const categories = [
   },
   {
     img: "assets/beach_cat.jpg",
-    label: "Beachfront",
-    icon: <TbBeach />,
-    description: "This property is close to the beach!",
+    label: "Mohammadpur",
+    icon: <MdOutlineVilla />, // You can choose a more fitting icon
+    description: "A vibrant area known for its community parks and markets.",
   },
   {
     img: "assets/windmill_cat.webp",
-    label: "Windmills",
-    icon: <GiWindmill />,
-    description: "This property is has windmills!",
+    label: "Gulshan",
+    icon: <IoDiamond />, // Luxury and upscale living
+    description: "An upscale neighborhood with luxury shopping and dining.",
   },
   {
     img: "assets/modern_cat.webp",
-    label: "Iconic cities",
-    icon: <MdOutlineVilla />,
-    description: "This property is modern!",
+    label: "Mirpur",
+    icon: <TbMountain />, // Symbolizing hills or parks
+    description: "A bustling area with a mix of residential and commercial spaces.",
   },
   {
     img: "assets/countryside_cat.webp",
-    label: "Countryside",
-    icon: <TbMountain />,
-    description: "This property is in the countryside!",
+    label: "Dhanmondi",
+    icon: <GiIsland />, // Suggesting a calm atmosphere
+    description: "Known for its lakes and cultural spots, perfect for relaxation.",
   },
   {
     img: "assets/pool_cat.jpg",
-    label: "Amazing Pools",
-    icon: <TbPool />,
-    description: "This is property has a beautiful pool!",
+    label: "Bashundhara",
+    icon: <TbPool />, // For residential areas with pools
+    description: "A modern residential area with beautiful landscapes.",
   },
   {
     img: "assets/island_cat.webp",
-    label: "Islands",
-    icon: <GiIsland />,
-    description: "This property is on an island!",
+    label: "Banani",
+    icon: <GiWindmill />, // For its modern architecture
+    description: "A posh area featuring parks and premium living spaces.",
   },
   {
     img: "assets/lake_cat.webp",
-    label: "Lakefront",
-    icon: <GiBoatFishing />,
-    description: "This property is near a lake!",
+    label: "Lalmatia",
+    icon: <GiBoatFishing />, // Suggesting proximity to water
+    description: "A serene neighborhood with tree-lined streets and parks.",
   },
   {
     img: "assets/skiing_cat.jpg",
-    label: "Ski-in/out",
-    icon: <FaSkiing />,
-    description: "This property has skiing activies!",
+    label: "Tejgaon",
+    icon: <FaSkiing />, // Suggesting activity and commerce
+    description: "An industrial hub with various business establishments.",
   },
   {
     img: "assets/castle_cat.webp",
-    label: "Castles",
-    icon: <GiCastle />,
-    description: "This property is an ancient castle!",
+    label: "Old Dhaka",
+    icon: <GiCastle />, // Reflecting historical significance
+    description: "Rich in history, known for its ancient architecture and culture.",
   },
   {
     img: "assets/cave_cat.jpg",
-    label: "Caves",
-    icon: <GiCaveEntrance />,
-    description: "This property is in a spooky cave!",
+    label: "Uttara",
+    icon: <GiCaveEntrance />, // Reflecting urban development
+    description: "A growing area with modern infrastructure and amenities.",
   },
   {
     img: "assets/camping_cat.jpg",
-    label: "Camping",
-    icon: <GiForestCamp />,
-    description: "This property offers camping activities!",
+    label: "Sadarghat",
+    icon: <GiForestCamp />, // Suggesting river activities
+    description: "A vibrant riverside area known for its ferry services.",
   },
   {
     img: "assets/arctic_cat.webp",
-    label: "Arctic",
-    icon: <BsSnow />,
-    description: "This property is in arctic environment!",
+    label: "Puran Dhaka",
+    icon: <BsSnow />, // Reflecting cultural heritage
+    description: "Known for its traditional markets and local foods.",
   },
   {
     img: "assets/desert_cat.webp",
-    label: "Desert",
-    icon: <GiCactus />,
-    description: "This property is in the desert!",
+    label: "Jatrabari",
+    icon: <GiCactus />, // Suggesting bustling activity
+    description: "A busy area known for its transport links and commercial spaces.",
   },
   {
     img: "assets/barn_cat.jpg",
-    label: "Barns",
-    icon: <GiBarn />,
-    description: "This property is in a barn!",
+    label: "Badda",
+    icon: <GiBarn />, // Suggesting urban lifestyle
+    description: "A vibrant community with growing residential options.",
   },
   {
     img: "assets/lux_cat.jpg",
-    label: "Luxury",
-    icon: <IoDiamond />,
-    description: "This property is brand new and luxurious!",
+    label: "Bashabo",
+    icon: <IoDiamond />, // Representing luxury
+    description: "An upscale area with modern amenities and services.",
   },
 ];
-
 export const types = [
   {
     name: "An entire place",
@@ -148,13 +147,13 @@ export const types = [
     icon: <FaHouseUser />,
   },
   {
-    name: "Room(s)",
+    name: "APARTMENT",
     description:
       "Guests have their own room in a house, plus access to shared places",
     icon: <BsFillDoorOpenFill />,
   },
   {
-    name: "A Shared Room",
+    name: "A Shared APARTMENT",
     description:
       "Guests sleep in a room or common area that maybe shared with you or others",
     icon: <FaPeopleRoof />,
