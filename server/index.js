@@ -69,9 +69,11 @@ const listingRoutes = require("./routes/listing.js");
 const bookingRoutes = require("./routes/booking.js");
 const userRoutes = require("./routes/user.js");
 const messageRoutes = require("./routes/message.js"); // Import the message routes
+const notificationRoutes=require("./routes/notification.js");
 
 app.use("/auth", authRoutes);
 app.use("/properties", listingRoutes);
 app.use("/bookings", bookingRoutes);
 app.use("/users", userRoutes); // User-related routes
 app.use("/messages", messageRoutes); // Message-related routes
+app.use("/notification",notificationRoutes);

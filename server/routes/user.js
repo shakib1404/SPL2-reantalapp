@@ -94,4 +94,42 @@ router.get("/:userId/properties", async (req, res) => {
       res.status(500).send({ error: "Server error" });
     }
   });
+
+  router.delete("/:userId/:listingId", async (req, res) => {
+    try {
+      const { userId, listingId } = req.params;
+      const user = await User.findById(userId);
+      const listing = await Listing.findById(listingId);
+  
+      // Check if the listing exists in the user's wishlist
+      const favouriteListing = user.wishList.find(
+        (item) => item._id.toString() === listingId
+      );
+  
+      if (!favouriteListing) {
+        return res.status(404).json({
+          message: "Listing not found in wishlist",
+          wishList: user.wishList,
+        });
+      }
+  
+      // Remove listing from the wishlist
+      user.wishList = user.wishList.filter(
+        (item) => item._id.toString() !== listingId
+      );
+  
+      // Save the updated user
+      await user.save();
+  
+      // Return the updated wishlist
+      res.status(200).json({
+        message: "Listing removed from wishlist",
+        wishList: user.wishList,
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(404).json({ error: err.message });
+    }
+  });
+  
 module.exports = router;

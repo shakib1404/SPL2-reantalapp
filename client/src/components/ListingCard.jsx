@@ -44,27 +44,62 @@ const ListingCard = ({
   /* ADD TO WISHLIST */
   const user = useSelector((state) => state.user);
   const wishList = user?.wishList || [];
+  console.log(wishList);
 
   const isLiked = wishList?.find((item) => item?._id === listingId);
+  console.log(isLiked);
 
   const patchWishList = async () => {
     if (user?._id !== creator._id) {
-      const response = await fetch(
-        `http://localhost:3001/Users/${user?._id}/${listingId}`,
-        {
-          method: "PATCH",
-          header: {
-            "Content-Type": "application/json",
-          },
+      try {
+        // Update Wishlist: Remove from wishlist if it's already there, add it if it's not
+        const method = isLiked ? "DELETE" : "PATCH";  // If it's liked, remove it (DELETE), otherwise add it (PATCH)
+        const response = await fetch(
+          `http://localhost:3001/Users/${user?._id}/${listingId}`,
+          {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          dispatch(setWishList(data.wishList));  // Update Redux store with new wishlist
+  
+          // Send Notification
+          const notificationResponse = await fetch(
+            `http://localhost:3001/notification`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId: creator._id, // Landlord's ID
+                senderId: user._id,
+                listingId,
+                message: isLiked
+                  ? `${user.firstname} removed your property from their wishlist.`
+                  : `${user.firstname} added your property to their wishlist.`,
+              }),
+            }
+          );
+  
+          if (!notificationResponse.ok) {
+            console.error("Failed to send notification");
+          }
+        } else {
+          console.error("Failed to update wishlist:", data.message);
         }
-      );
-      const data = await response.json();
-      dispatch(setWishList(data.wishList));
-    } else {
-      return;
+      } catch (error) {
+        console.error("Error updating wishlist:", error);
+      }
     }
   };
-
+  
   return (
     <div
       className="listing-card"
