@@ -88,12 +88,27 @@ router.get("/:userId/properties", async (req, res) => {
   router.get('/:userId', async (req, res) => {
     try {
       const user = await User.findById(req.params.userId);
-      if (!user) return res.status(404).send({ error: "User not found" });
-      res.json({ name: user.firstname });
+  
+      if (!user) return res.status(404).send({ error: 'User not found' });
+  
+      // Respond with all user attributes including propertyList
+      res.json({
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        profileimagePath: user.profileimagePath,
+        tripList: user.tripList,
+        wishList: user.wishList,
+        propertyList: user.propertyList,
+        reservationList: user.reservationList,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      });
     } catch (err) {
-      res.status(500).send({ error: "Server error" });
+      res.status(500).send({ error: 'Server error' });
     }
   });
+  
 
   router.delete("/:userId/:listingId", async (req, res) => {
     try {

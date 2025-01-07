@@ -1,0 +1,105 @@
+// NotificationPage.scss
+
+.notification-page {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .title {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+  }
+  
+  .error-message {
+    color: red;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .delete-all-btn-container {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .delete-all-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+    &:hover {
+      background-color: #c0392b;
+    }
+  }
+  
+  .notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .notification-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+  
+  .notification-box {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .notification-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+    &:hover {
+      background-color: #c0392b;
+    }
+  }
+  
+  .notification-body {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .notification-footer {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #888;
+  }
+  
+  .no-notifications {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+  }
+  

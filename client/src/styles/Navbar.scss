@@ -15,27 +15,36 @@
   img {
     width: 100px;
     cursor: pointer;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
   }
 
   &_search {
     border: 1px solid $grey;
     border-radius: 30px;
     height: 50px;
-    padding: 0px 20px;
+    padding: 0 20px;
     display: flex;
     gap: 40px;
     align-items: center;
+    background-color: $lightgrey;
 
     input {
       border: none;
       outline: none;
+      flex-grow: 1;
+      font-size: 1rem;
+      background-color: transparent;
     }
 
     &:hover {
       @include shadow;
     }
 
-    @include lg {
+    @include sm {
       display: none;
     }
   }
@@ -50,6 +59,7 @@
       color: $blue;
       font-weight: 700;
       cursor: pointer;
+      transition: color 0.3s ease;
 
       &:hover {
         color: $pinkred;
@@ -60,6 +70,26 @@
       }
     }
 
+    &_notification {
+      position: relative;
+      cursor: pointer;
+
+      .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: $pinkred;
+        color: white;
+        font-size: 0.75rem;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+    }
+
     &_account {
       height: 50px;
       display: flex;
@@ -67,10 +97,10 @@
       padding: 0 10px;
       border: 1px solid $grey;
       border-radius: 30px;
-      display: flex;
       gap: 10px;
       background-color: white;
       cursor: pointer;
+      transition: box-shadow 0.3s ease;
 
       &:hover {
         @include shadow;
@@ -79,6 +109,8 @@
       img {
         width: 40px;
         height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
       }
     }
 
@@ -106,11 +138,27 @@
         text-decoration: none;
         color: $blue;
         font-weight: 700;
+        transition: background-color 0.3s ease, color 0.3s ease;
 
         &:hover {
           color: $pinkred;
           background-color: rgba(217, 213, 213, 0.2);
         }
+      }
+    }
+  }
+
+  &_mobile-menu {
+    display: none;
+
+    @include sm {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .menu-icon {
+        font-size: 24px;
+        cursor: pointer;
       }
     }
   }

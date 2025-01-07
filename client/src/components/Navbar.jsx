@@ -1,7 +1,7 @@
-import { IconButton } from "@mui/material";
-import { Search, Person, Menu } from "@mui/icons-material";
+import { IconButton, Badge } from "@mui/material";
+import { Search, Person, Menu, Notifications } from "@mui/icons-material";
 import variables from "../styles/variables.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import "../styles/Navbar.scss";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,21 +9,58 @@ import { setLogout } from "../redux/state";
 
 const Navbar = () => {
   const [dropdownMenu, setDropdownMenu] = useState(false);
-
-  const user = useSelector((state) => state.user);
-
-  const dispatch = useDispatch();
-
+  const [notifications, setNotifications] = useState([]);
+  const [isLandlord, setIsLandlord] = useState(false); // Determine if user is a landlord
   const [search, setSearch] = useState("");
 
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const checkLandlordStatus = async () => {
+    if (!user) return; // Ensure user is defined before proceeding
+    try {
+      const response = await fetch(`http://localhost:3001/users/${user._id}/properties`);
+      const data = await response.json();
+
+      // Check if the user has any properties in the propertyList of creator
+      const landlord = data.some(property => property.creator._id === user._id );
+      setIsLandlord(landlord);
+
+      // Fetch notifications if the user is a landlord
+      /*if (landlord) {
+        fetchNotifications();
+      }*/
+    } catch (error) {
+      console.error("Error checking landlord status:", error);
+    }
+};
+
+  // Fetch notifications for landlords
+  /*const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/notification/${user._id}/`);
+      const data = await response.json();
+      setNotifications(data.notifications || []);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };*/
+  // Fetch properties and notifications when the component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      checkLandlordStatus();
+    }
+  }, [user]);
 
   return (
     <div className="navbar">
+      {/* Logo */}
       <a href="/">
         <img src="/assets/logo.webp" alt="logo" />
       </a>
 
+      {/* Search Bar */}
       <div className="navbar_search">
         <input
           type="text"
@@ -41,7 +78,9 @@ const Navbar = () => {
         </IconButton>
       </div>
 
+      {/* Right Section */}
       <div className="navbar_right">
+        {/* Host Link */}
         {user ? (
           <a href="/create-listing" className="host">
             Become A Host
@@ -52,6 +91,24 @@ const Navbar = () => {
           </a>
         )}
 
+        {/* Notification Icon (for landlords only) */}
+        {isLandlord && (
+          <IconButton
+            onClick={() => {
+              navigate(`/notification/${user._id}`);
+            }}
+          >
+            <Badge
+              badgeContent={notifications.length}
+              color="error"
+              overlap="circular"
+            >
+              <Notifications sx={{ color: variables.darkgrey }} />
+            </Badge>
+          </IconButton>
+        )}
+
+        {/* Account Menu */}
         <button
           className="navbar_right_account"
           onClick={() => setDropdownMenu(!dropdownMenu)}
@@ -71,29 +128,31 @@ const Navbar = () => {
           )}
         </button>
 
-        {dropdownMenu && !user && (
+        {/* Dropdown Menu */}
+        {dropdownMenu && (
           <div className="navbar_right_accountmenu">
-            <Link to="/login">Log In</Link>
-            <Link to="/register">Sign Up</Link>
-          </div>
-        )}
-
-        {dropdownMenu && user && (
-          <div className="navbar_right_accountmenu">
-            <Link to={`/${user._id}/trips`}>Previous Houses</Link>
-            <Link to={`/${user._id}/wishList`}>Wish List</Link>
-            <Link to={`/${user._id}/properties`}>Property List</Link>
-            <Link to={`/${user._id}/reservations`}>Reservation List</Link>
-            <Link to="/create-listing">Become A Host</Link>
-
-            <Link
-              to="/login"
-              onClick={() => {
-                dispatch(setLogout());
-              }}
-            >
-              Log Out
-            </Link>
+            {!user ? (
+              <>
+                <Link to="/login">Log In</Link>
+                <Link to="/register">Sign Up</Link>
+              </>
+            ) : (
+              <>
+                <Link to={`/${user._id}/trips`}>Previous Houses</Link>
+                <Link to={`/${user._id}/wishList`}>Wish List</Link>
+                <Link to={`/${user._id}/properties`}>Property List</Link>
+                <Link to={`/${user._id}/reservations`}>Reservation List</Link>
+                <Link to="/create-listing">Become A Host</Link>
+                <Link
+                  to="/login"
+                  onClick={() => {
+                    dispatch(setLogout());
+                  }}
+                >
+                  Log Out
+                </Link>
+              </>
+            )}
           </div>
         )}
       </div>
