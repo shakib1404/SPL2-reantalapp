@@ -9,7 +9,6 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
 
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,7 +23,6 @@ const LoginPage = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      /* Get data after fetching */
       const loggedIn = await response.json();
 
       if (loggedIn) {
@@ -61,7 +59,10 @@ const LoginPage = () => {
           />
           <button type="submit">LOG IN</button>
         </form>
-        <a href="/register">Don't have an account? Sign In Here</a>
+        <div className="login_content_links">
+          <a href="/forgot-password">Forgot Password..                          </a>
+          <a href="/register">Sign Up Here</a>
+        </div>
       </div>
     </div>
   );

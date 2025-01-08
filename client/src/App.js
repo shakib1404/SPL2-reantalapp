@@ -13,6 +13,7 @@ import CategoryPage from "./Pages/CategoryPage";
 import SearchPage from "./Pages/SearchPage";
 import ChatPage from "./components/chatPage"; // Corrected import name
 import NotificationPage from "./Pages/NotificationPage";
+import ForgotPasswordPage from "./Pages/ForgetPasswordPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/create-listing" element={<CreateListing />} />
           <Route path="/properties/:listingId" element={<ListingDetails />} />
           <Route path="/properties/category/:category" element={<CategoryPage />} />

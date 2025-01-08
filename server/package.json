@@ -18,6 +18,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.1",
     "multer-gridfs-storage": "^5.0.2",
+    "nodemailer": "^6.9.16",
     "socket.io": "^4.8.0"
   }
 }
