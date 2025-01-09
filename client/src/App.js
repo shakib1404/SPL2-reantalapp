@@ -14,6 +14,8 @@ import SearchPage from "./Pages/SearchPage";
 import ChatPage from "./components/chatPage"; // Corrected import name
 import NotificationPage from "./Pages/NotificationPage";
 import ForgotPasswordPage from "./Pages/ForgetPasswordPage";
+import UpdatePage from "./Pages/UpdatePage";
+
 
 function App() {
   return (
@@ -34,6 +36,7 @@ function App() {
           <Route path="/:userId/reservations" element={<ReservationList />} />
           <Route path="/chat/:listingId" element={<ChatPage />} /> {/* Corrected to ChatPage */}
           <Route path="/notification/:userId" element={<NotificationPage/>}/>
+          <Route path="/properties/edit/:listingId" element={<UpdatePage/>}/>
           
         </Routes>
       </BrowserRouter>

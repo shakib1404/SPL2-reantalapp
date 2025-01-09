@@ -129,4 +129,92 @@ router.get("/:listingId", async (req, res) => {
   }
 });
 
+router.delete("/:listingId", async (req, res) => {
+  try {
+    const { listingId } = req.params;
+
+    const deletedListing = await Listing.findByIdAndDelete(listingId);
+
+    if (!deletedListing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.status(200).json({ message: "Listing deleted successfully", deletedListing });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete listing", error: err.message });
+  }
+});
+router.put("/update/:listingId", upload.array("listingPhotos"), async (req, res) => {
+  try {
+    const { listingId } = req.params;
+    const {
+      creator,
+      category,
+      type,
+      streetAddress,
+      aptSuit,
+      city,
+      province,
+      country,
+      guestCount,
+      bathroomCount,
+      bedroomCount,
+      bedCount,
+      amenities,
+      title,
+      description,
+      highlight,
+      highlightdescription,
+      price,
+      latitude, // Include latitude
+      longitude, // Include longitude
+    } = req.body;
+
+    const listingPhotos = req.files;
+    let listingPhotoPaths = [];
+
+    if (listingPhotos.length > 0) {
+      listingPhotoPaths = listingPhotos.map((file) => file.path);
+    }
+
+    const updatedListing = await Listing.findByIdAndUpdate(
+      listingId,
+      {
+        creator,
+        category,
+        type,
+        streetAddress,
+        aptSuit,
+        city,
+        province,
+        country,
+        guestCount,
+        bathroomCount,
+        bedroomCount,
+        bedCount,
+        amenities,
+        title,
+        description,
+        highlight,
+        highlightdescription,
+        price,
+        latitude, // Store latitude
+        longitude, // Store longitude
+        listingPhotoPaths: listingPhotoPaths.length > 0 ? listingPhotoPaths : undefined, // Only update photos if new ones are uploaded
+      },
+      { new: true }
+    );
+
+    if (!updatedListing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.status(200).json(updatedListing);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update listing", error: err.message });
+    console.log(err);
+  }
+});
+
+
 module.exports = router;

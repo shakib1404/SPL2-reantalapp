@@ -3,35 +3,41 @@
 .listing-card {
   position: relative;
   cursor: pointer;
-  padding: 10px;
+  padding: 15px; // Increased padding for a cleaner layout
   border-radius: 10px;
+  transition: box-shadow 0.3s ease;
 
+  // Hover effect for card
   &:hover {
-    @include shadow;
+    @include shadow; // Reuses the mixin for a shadow effect
+    transform: translateY(-2px); // Slight lift effect
   }
 
   .slider-container {
-    width: 300px;
+    width: 100%;
+    max-width: 300px; // Constrain the slider width
     overflow: hidden;
     border-radius: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 15px; // Extra space below slider
 
     .slider {
       display: flex;
-      transition: transform 0.5s ease;
+      transition: transform 0.5s ease-in-out;
 
       .slide {
         position: relative;
         flex: 0 0 100%;
         width: 100%;
-        height: 270px;
+        height: 270px; // Adjusted for consistent image dimensions
         display: flex;
         align-items: center;
 
         img {
           width: 100%;
           height: 100%;
+          object-fit: cover; // Ensures consistent image scaling
           filter: brightness(85%);
+          border-radius: 10px; // Keeps rounded corners
         }
 
         .prev-button,
@@ -39,43 +45,81 @@
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          padding: 6px;
+          padding: 8px; // Slightly larger buttons for accessibility
           border-radius: 50%;
           border: none;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: rgba(255, 255, 255, 0.7);
-          z-index: 9999;
+          background-color: rgba(255, 255, 255, 0.8);
+          z-index: 2;
+          transition: background-color 0.2s ease;
 
           &:hover {
-            background-color: white;
+            background-color: #fff; // Pure white on hover
           }
         }
 
         .prev-button {
-          left: 10px;
+          left: 15px;
         }
 
         .next-button {
-          right: 10px;
+          right: 15px;
         }
       }
     }
   }
 
   h3 {
-    font-size: 18px;
+    font-size: 20px; // Larger text for titles
+    margin: 10px 0; // Space between heading and content
+    font-weight: bold;
+    color: $primary-dark; // Use a color variable for consistency
   }
 
   p {
     font-size: 16px;
+    margin: 5px 0; // Reduce spacing between lines
+    color: $text-color-light; // Subtle text color
   }
 
   span {
     font-weight: 700;
     font-size: 18px;
+    color: $primary; // Highlight the price text
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px; // Space between buttons
+    margin-top: 15px; // Space above buttons
+
+    .edit-button,
+    .delete-button {
+      padding: 8px 15px; // Add padding for consistent button size
+      font-size: 14px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: $button-hover; // Use a hover color variable
+      }
+    }
+
+    .edit-button {
+      background-color: $blue-light;
+      color: $blue-dark;
+    }
+
+    .delete-button {
+      background-color: $red-light;
+      color: $red-dark;
+    }
   }
 
   .favorite {
@@ -83,9 +127,18 @@
     right: 20px;
     top: 20px;
     border: none;
-    font-size: 20px;
+    font-size: 24px; // Larger icon for better visibility
     cursor: pointer;
-    z-index: 999;
+    z-index: 1;
     background: none;
+    transition: color 0.3s ease;
+
+    &.liked {
+      color: $red-dark; // Highlighted color for "liked" state
+    }
+
+    &:not(.liked):hover {
+      color: $gray-dark; // Subtle hover for "not liked" state
+    }
   }
 }
