@@ -20,7 +20,32 @@ const ListingDetails = () => {
   const [loading, setLoading] = useState(true);
   const { listingId } = useParams();
   const [listing, setListing] = useState(null);
+  const [isLandlord, setIsLandlord] = useState(false); // Track landlord status
+  const [selectedDate, setSelectedDate] = useState(new Date()); // Booking date
+  const [customerDetails, setCustomerDetails] = useState(null);
 
+  const customerId = useSelector((state) => state?.user?._id); // Get user ID
+  const userRole = useSelector((state) => state?.user?.role); // Assuming role is stored in Redux
+
+  const navigate = useNavigate();
+  //customer details
+  const getCustomerDetails = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/users/${customerId}`);
+      const data = await response.json();
+      setCustomerDetails(data);
+    } catch (err) {
+      console.log("Error fetching customer details:", err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (customerId) {
+      getCustomerDetails();
+    }
+  }, [customerId]);
+
+  // Fetch listing details
   const getListingDetails = async () => {
     try {
       setLoading(true);
@@ -30,7 +55,6 @@ const ListingDetails = () => {
           method: "GET",
         }
       );
-
       const data = await response.json();
       setListing(data);
       setLoading(false);
@@ -39,44 +63,44 @@ const ListingDetails = () => {
     }
   };
 
-  useEffect(() => {
-    getListingDetails();
-  }, []);
+  // Determine if the user is a landlord
+  const currentUserRole = async () => {
+    if (!customerId) return; // Ensure user is defined before proceeding
+    try {
+      const response = await fetch(
+        `http://localhost:3001/users/${customerId}/properties`
+      );
+      const data = await response.json();
 
-  /* BOOKING CALENDAR */
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: new Date(),
-      endDate: new Date(),
-      key: "selection",
-    },
-  ]);
-
-  const handleSelect = (ranges) => {
-    // Update the selected date range when user makes a selection
-    setDateRange([ranges.selection]);
+      // Check if the user has any properties in the propertyList of creator
+      const landlord = data.some((property) => property.creator._id === customerId);
+      setIsLandlord(landlord);
+    } catch (error) {
+      console.error("Error checking landlord status:", error);
+    }
   };
 
-  const start = new Date(dateRange[0].startDate);
-  const end = new Date(dateRange[0].endDate);
-  const dayCount = Math.round(end - start) / (1000 * 60 * 60 * 24); // Calculate the difference in day unit
+  // Handle booking date change
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
 
-  /* SUBMIT BOOKING */
-  const customerId = useSelector((state) => state?.user?._id);
-  const currentUserRole = useSelector((state) => state?.user?.role); // Assuming 'renter' or 'landlord'
-
-  const navigate = useNavigate();
-
+  // Handle booking form submission
   const handleSubmit = async () => {
     try {
       const bookingForm = {
         customerId,
         listingId,
         hostId: listing.creator._id,
-        startDate: dateRange[0].startDate.toDateString(),
-        endDate: dateRange[0].endDate.toDateString(),
-        totalPrice: listing.price * dayCount,
+        bookingDate: selectedDate.toDateString(), // Use single date
+        totalPrice: listing.price, // Single-day price
       };
+      console.log(customerId);
+      console.log(listingId);
+      console.log(listing.creator._id);
+      console.log(selectedDate.toDateString());
+      console.log(listing.price);
+
 
       const response = await fetch("http://localhost:3001/bookings/create", {
         method: "POST",
@@ -89,6 +113,21 @@ const ListingDetails = () => {
       if (response.ok) {
         navigate(`/${customerId}/trips`);
       }
+
+      
+      await fetch(`http://localhost:3001/notification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: listing.creator._id,
+          senderId: customerId,
+          listingId,
+          type: 'BOOKING_REQUEST',
+          message: `${customerDetails.firstname} wants to visit you on ${selectedDate.toDateString()}`
+        }),
+      });
     } catch (err) {
       console.log("Submit Booking Failed.", err.message);
     }
@@ -99,6 +138,12 @@ const ListingDetails = () => {
     // Navigate to the chat window for the listing
     navigate(`/chat/${listingId}`);
   };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    getListingDetails();
+    currentUserRole();
+  }, [customerId, listingId]);
 
   return loading ? (
     <Loader />
@@ -155,7 +200,6 @@ const ListingDetails = () => {
         {listing.latitude && listing.longitude && (
           <div className="location">
             <h3>Location</h3>
-            {/* Full Map with Marker */}
             <MapContainer
               center={[listing.latitude, listing.longitude]}
               zoom={13}
@@ -181,50 +225,49 @@ const ListingDetails = () => {
         )}
 
         <div className="booking">
-          <div>
-            <h2>What this place offers?</h2>
-            <div className="amenities">
-              {listing.amenities[0].split(",").map((item, index) => (
-                <div className="facility" key={index}>
-                  <div className="facility_icon">
-                    {
-                      facilities.find((facility) => facility.name === item)
-                        ?.icon
-                    }
-                  </div>
-                  <p>{item}</p>
+          <h2>What this place offers?</h2>
+          <div className="amenities">
+            {listing.amenities[0].split(",").map((item, index) => (
+              <div className="facility" key={index}>
+                <div className="facility_icon">
+                  {
+                    facilities.find((facility) => facility.name === item)
+                      ?.icon
+                  }
                 </div>
-              ))}
-            </div>
+                <p>{item}</p>
+              </div>
+            ))}
           </div>
+
           <hr />
           <div>
-            <h2>How long do you want to stay?</h2>
+            <h2>Choose your stay date:</h2>
             <div className="date-range-calendar">
-              <DateRange ranges={dateRange} onChange={handleSelect} />
-              {dayCount > 1 ? (
-                <h2>
-                  ${listing.price} x {dayCount} nights
-                </h2>
-              ) : (
-                <h2>
-                  ${listing.price} x {dayCount} night
-                </h2>
-              )}
-
-              <h2>Total price: ${listing.price * dayCount}</h2>
-              <p>Start Date: {dateRange[0].startDate.toDateString()}</p>
-              <p>End Date: {dateRange[0].endDate.toDateString()}</p>
-
-              <button className="button" type="submit" onClick={handleSubmit}>
-                BOOKING
+              <DateRange
+                ranges={[
+                  {
+                    startDate: selectedDate,
+                    endDate: selectedDate, // Single date for both start and end
+                    key: "selection",
+                  },
+                ]}
+                onChange={(ranges) =>
+                  handleDateChange(ranges.selection.startDate)
+                } // Handle single date
+                showDateDisplay={false} // Hides range details
+              />
+              <h3>Selected Date: {selectedDate.toDateString()}</h3>
+              <h3>Price: ${listing.price}</h3>
+              <button className="button" onClick={handleSubmit}>
+                Request Booking
               </button>
             </div>
           </div>
         </div>
 
         {/* Chat Button */}
-        {currentUserRole !== "landlord" && (
+        {userRole !== "landlord" && (
           <div className="chat-button-container">
             <button className="button" onClick={handleChatClick}>
               Chat with Host
@@ -232,7 +275,7 @@ const ListingDetails = () => {
           </div>
         )}
 
-        {currentUserRole === "landlord" && (
+        {userRole === "landlord" && (
           <div className="chat-button-container">
             <button className="button" onClick={handleChatClick}>
               View Messages

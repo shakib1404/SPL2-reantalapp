@@ -17,13 +17,14 @@ router.get('/:userId', async (req, res) => {
 
 // Create a new notification
 router.post('/', async (req, res) => {
-  const { userId, senderId, listingId, message } = req.body;
+  const { userId, senderId, listingId,type, message } = req.body;
 
   try {
     const newNotification = new Notification({
       userId,
       senderId,
       listingId,
+      type,
       message,
     });
 

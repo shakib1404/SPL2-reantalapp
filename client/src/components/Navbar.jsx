@@ -92,7 +92,7 @@ const Navbar = () => {
         )}
 
         {/* Notification Icon (for landlords only) */}
-        {isLandlord && (
+        {
           <IconButton
             onClick={() => {
               navigate(`/notification/${user._id}`);
@@ -106,7 +106,7 @@ const Navbar = () => {
               <Notifications sx={{ color: variables.darkgrey }} />
             </Badge>
           </IconButton>
-        )}
+        }
 
         {/* Account Menu */}
         <button

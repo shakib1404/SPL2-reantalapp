@@ -24,6 +24,11 @@ const notificationSchema = new mongoose.Schema({
     type: Boolean, 
     default: false,
   },
+  type: {
+    type: String,
+    enum: ['BOOKING_REQUEST', 'BOOKING_APPROVED', 'BOOKING_DECLINED', 'WISHLIST', 'GENERAL'],
+    required: true
+  },
   timestamp: {
     type: Date, 
     default: Date.now,

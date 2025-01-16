@@ -5,8 +5,16 @@ const Booking=require("../Models/Booking")
 router.post("/create",async(req,res)=>
 {
     try {
-        const {customerId,listingId,startDate,endDate,totalPrice}=req.body
-        const newBooking=new Booking({customerId,listingId,startDate,endDate,totalPrice})
+        const {customerId,
+            hostId, // Added hostId as part of the booking
+            listingId,
+            bookingDate,
+            totalPrice,}=req.body
+        const newBooking=new Booking({customerId,
+            hostId, // Added hostId as part of the booking
+            listingId,
+            bookingDate,
+            totalPrice,})
         await newBooking.save()
         res.status(200).json(newBooking)
         

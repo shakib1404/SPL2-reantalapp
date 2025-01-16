@@ -22,8 +22,7 @@ const ListingCard = ({
   category,
   type,
   price,
-  startDate,
-  endDate,
+  bookingDate,
   totalPrice,
   booking,
 }) => {
@@ -76,6 +75,7 @@ const ListingCard = ({
               userId: creator._id,
               senderId: user._id,
               listingId,
+              type:'WISHLIST',
               message: isLiked
                 ? `${user.firstname} removed your property from their wishlist.`
                 : `${user.firstname} added your property to their wishlist.`,
@@ -195,7 +195,7 @@ const ListingCard = ({
       ) : (
         <>
           <p>
-            {startDate} - {endDate}
+           {bookingDate}
           </p>
           <p>
             <span>${totalPrice}</span> total
