@@ -1,138 +1,181 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
 import { useSelector } from "react-redux";
+import { io } from "socket.io-client";
 import "../styles/chat.scss";
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:3001"); // Initialize socket connection
 
 const ChatPage = () => {
   const { listingId } = useParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [senders, setSenders] = useState({}); 
-  const [landlordName, setLandlordName] = useState(""); 
+  const [senders, setSenders] = useState({});
+  const [landlordName, setLandlordName] = useState("");
+  const [landlordId, setLandlordId] = useState(null);
+  const [isLandlord, setIsLandlord] = useState(false);
   const navigate = useNavigate();
-
   const currentUser = useSelector((state) => state.user);
 
   useEffect(() => {
+    // If user is not logged in, redirect to login page
     if (!currentUser) {
-      navigate("/login"); // Redirect to login if not logged in
+      navigate("/login");
       return;
     }
 
-    // Fetch all messages for the chat room
-    fetch(`http://localhost:3001/messages/${listingId}`)
-      .then((res) => res.json())
-      .then((data) => setMessages(data));
+    console.log("Listing ID:", listingId);
+    console.log("Current User ID:", currentUser._id);
 
-    // Join the specific room based on listingId for socket communication
+    // Fetch messages related to the listing and user
+    fetch(`http://localhost:3001/messages/${listingId}?userId=${currentUser._id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Fetched messages:", data);
+        if (Array.isArray(data)) {
+          setMessages(data);
+        } else {
+          setMessages([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching messages:", error);
+        setMessages([]);
+      });
+
+    // Emit event to join the room (for socket communication)
     socket.emit("joinRoom", listingId);
 
-    // Listen for new messages sent to the room
+    // Listen for real-time messages
     socket.on("receiveMessage", (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
+      if (
+        (message.senderId === currentUser._id && message.receiverId === landlordId) ||
+        (message.senderId === landlordId && message.receiverId === currentUser._id)
+      ) {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      }
     });
 
+    // Cleanup socket listener on component unmount
     return () => {
       socket.off("receiveMessage");
     };
-  }, [listingId, currentUser, navigate]);
+  }, [listingId, currentUser, landlordId, navigate]);
 
   useEffect(() => {
-    // Fetch sender and receiver details when messages are updated
-    const fetchSenderReceiverDetails = async () => {
-      const senderIds = [...new Set(messages.map((msg) => msg.senderId))];
-      const receiverIds = [...new Set(messages.map((msg) => msg.receiverId))];
-      
-      // Combine sender and receiver IDs
-      const userIds = [...new Set([...senderIds, ...receiverIds])];
-      const userDetails = {};
+    const fetchDetails = async () => {
+      try {
+        // Fetch property details
+        const listing = await fetch(`http://localhost:3001/properties/${listingId}`).then((res) =>
+          res.json()
+        );
 
-      // Fetch details for all users
-      for (const id of userIds) {
-        const response = await fetch(`http://localhost:3001/users/${id}`);
-        const data = await response.json();
-        userDetails[id] = data.name; 
+        if (listing?.creator) {
+          setLandlordId(listing.creator._id);
+          setLandlordName(listing.creator.firstname);
+        } else {
+          console.error("Creator information is missing in the listing:", listing);
+        }
+
+        // Get user details for all message participants
+        const userIds = Array.from(
+          new Set([...messages.map((msg) => msg.senderId), ...messages.map((msg) => msg.receiverId)])
+        );
+
+        const userDetailsPromises = userIds.map((id) =>
+          fetch(`http://localhost:3001/users/${id}`).then((res) => res.json())
+        );
+
+        const users = await Promise.all(userDetailsPromises);
+        const userDetails = users.reduce((acc, user) => {
+          acc[user._id] = user.name;
+          return acc;
+        }, {});
+
+        setSenders(userDetails);
+      } catch (error) {
+        console.error("Error fetching user or listing details:", error);
       }
-
-      setSenders(userDetails);
-
-      // Fetch landlord name (creator of the listing)
-      fetch(`http://localhost:3001/properties/${listingId}`)
-        .then((res) => res.json())
-        .then((listing) => {
-          setLandlordName(listing.creatorName); // Store the landlord's name
-        });
     };
 
-    if (messages.length > 0) {
-      fetchSenderReceiverDetails();
-    }
+    fetchDetails();
   }, [messages, listingId]);
 
-  const sendMessage = () => {
-    if (newMessage.trim() !== "") {
-      fetch(`http://localhost:3001/properties/${listingId}`)
-        .then((res) => res.json())
-        .then((listing) => {
-          const receiverId = listing.creator; 
-  
-          const messageData = {
-            senderId: currentUser._id,
-            receiverId,
-            listingId,
-            text: newMessage,
-          };
+  useEffect(() => {
+    const checkLandlordStatus = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/users/${currentUser._id}/properties`);
+        const properties = await response.json();
+        const isUserLandlord = properties.some(
+          (property) => property.creator._id === currentUser._id
+        );
+        setIsLandlord(isUserLandlord);
+      } catch (error) {
+        console.error("Error checking landlord status:", error);
+      }
+    };
 
-          socket.emit("sendMessage", messageData);
+    if (currentUser) checkLandlordStatus();
+  }, [currentUser]);
 
-          fetch("http://localhost:3001/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(messageData),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              setMessages((prevMessages) => [...prevMessages, data]);
-              setNewMessage(""); // Clear input after sending
-            })
-            .catch((err) => {
-              console.error("Error sending message:", err);
-              alert("Failed to send message.");
-            });
-        })
-        .catch((err) => {
-          console.error("Error fetching listing:", err);
-          alert("Failed to fetch listing details.");
-        });
-    } else {
-      alert("Message cannot be empty!");
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return alert("Message cannot be empty!");
+
+    try {
+      const listing = await fetch(`http://localhost:3001/properties/${listingId}`).then((res) =>
+        res.json()
+      );
+
+      const messageData = {
+        senderId: currentUser._id,
+        receiverId: listing.creator._id,
+        listingId,
+        text: newMessage,
+      };
+
+      // Emit message to the socket server
+      socket.emit("sendMessage", messageData);
+
+      // Send the message to the backend and save it to the database
+      const response = await fetch("http://localhost:3001/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(messageData),
+      });
+
+      const savedMessage = await response.json();
+      setMessages((prevMessages) => [...prevMessages, savedMessage]);
+      setNewMessage(""); // Clear the input field
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message.");
     }
   };
 
   return (
     <div className="chat-page">
-      <h2>Chat with Landlord</h2>
+      <h2>Chat with {isLandlord ? "Tenant" : landlordName || "Landlord"}</h2>
       <div className="messages">
-        {messages.map((msg, index) => {
-          const senderName = senders[msg.senderId] || (msg.senderId === currentUser._id ? "You" : "Landlord");
-          const receiverName = msg.receiverId === currentUser._id ? "You" : landlordName;
+        {Array.isArray(messages) && messages.length > 0 ? (
+          messages.map((msg, index) => {
+            const senderName =
+              senders[msg.senderId] || (msg.senderId === currentUser._id ? "You" : landlordName);
 
-          return (
-            <div
-              key={index}
-              className={msg.senderId === currentUser._id ? "my-message" : "other-message"}
-            >
-              <div className="message-header">
-                <span className="sender-name">{senderName}</span> 
-                <span className="receiver-name">{receiverName}</span>
+            return (
+              <div
+                key={index}
+                className={msg.senderId === currentUser._id ? "my-message" : "other-message"}
+              >
+                <div className="message-header">
+                  <span className="sender-name">{senderName}</span>
+                </div>
+                <p>{msg.text}</p>
               </div>
-              <p>{msg.text}</p>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <p>No messages available.</p>
+        )}
       </div>
 
       <div className="message-input">

@@ -132,13 +132,15 @@ const ListingDetails = () => {
       console.log("Submit Booking Failed.", err.message);
     }
   };
-
-  // Handle chat button click for both renter and landlord
   const handleChatClick = () => {
-    // Navigate to the chat window for the listing
-    navigate(`/chat/${listingId}`);
+    if (isLandlord) {
+      // If user is landlord, navigate to the messages associated with this listing
+      navigate(`/landlord/inbox/${listingId}`);
+    } else {
+      // If user is a renter, navigate to chat page
+      navigate(`/chat/${listingId}`);
+    }
   };
-
   // Fetch data on component mount
   useEffect(() => {
     getListingDetails();
@@ -267,7 +269,7 @@ const ListingDetails = () => {
         </div>
 
         {/* Chat Button */}
-        {userRole !== "landlord" && (
+        {!isLandlord && (
           <div className="chat-button-container">
             <button className="button" onClick={handleChatClick}>
               Chat with Host
@@ -275,7 +277,7 @@ const ListingDetails = () => {
           </div>
         )}
 
-        {userRole === "landlord" && (
+        {isLandlord&& (
           <div className="chat-button-container">
             <button className="button" onClick={handleChatClick}>
               View Messages

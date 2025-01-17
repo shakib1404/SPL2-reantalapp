@@ -15,6 +15,7 @@ import ChatPage from "./components/chatPage"; // Corrected import name
 import NotificationPage from "./Pages/NotificationPage";
 import ForgotPasswordPage from "./Pages/ForgetPasswordPage";
 import UpdatePage from "./Pages/UpdatePage";
+import LandlordInboxPage from "./Pages/LandlordInboxPage";
 
 
 function App() {
@@ -37,6 +38,8 @@ function App() {
           <Route path="/chat/:listingId" element={<ChatPage />} /> {/* Corrected to ChatPage */}
           <Route path="/notification/:userId" element={<NotificationPage/>}/>
           <Route path="/properties/edit/:listingId" element={<UpdatePage/>}/>
+
+          <Route path="/landlord/inbox/:listingId" element={<LandlordInboxPage />} /> 
           
         </Routes>
       </BrowserRouter>
