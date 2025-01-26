@@ -122,7 +122,7 @@ const CreateListing = () => {
   const handlePost = async (e) => {
     e.preventDefault();
     try {
-      // Log form data to ensure everything is correct
+      
       console.log(formDescription, formLocation, photos);
 
       const listingForm = new FormData();
