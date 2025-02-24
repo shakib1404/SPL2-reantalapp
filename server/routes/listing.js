@@ -103,21 +103,46 @@ class ListingController {
 
     async searchListings(req, res) {
         try {
-            const { search } = req.params;
-            const listings = search === "all"
-                ? await Listing.find().populate("creator")
-                : await Listing.find({
-                      $or: [
-                          { category: { $regex: search, $options: "i" } },
-                          { title: { $regex: search, $options: "i" } },
-                      ],
-                  }).populate("creator");
-
-            res.status(200).json(listings);
+          const { searchTerm, bedroomCount, bathroomCount, minPrice, maxPrice } = req.query;
+          
+          // Build filter object
+          let filter = {};
+          
+          // Add regex search for category and title if searchTerm exists
+          if (searchTerm) {
+            const searchRegex = new RegExp(searchTerm, 'i');
+            filter.$or = [
+              { category: searchRegex },
+              { title: searchRegex }
+            ];
+          }
+          
+          // Add exact match filters
+          if (bedroomCount) filter.bedroomCount = Number(bedroomCount);
+          if (bathroomCount) filter.bathroomCount = Number(bathroomCount);
+          
+          // Price range filter
+          if (minPrice || maxPrice) {
+            filter.price = {};
+            if (minPrice) filter.price.$gte = Number(minPrice);
+            if (maxPrice) filter.price.$lte = Number(maxPrice);
+          }
+          
+          console.log("Applied Filters:", filter);
+          
+          // Get listings that match ALL filters including regex search
+          const listings = await Listing.find(filter).populate("creator");
+          
+          res.status(200).json(listings);
         } catch (err) {
-            res.status(404).json({ message: "Fail to fetch Listing", error: err.message });
+          console.error("Error fetching listings:", err.message);
+          res.status(500).json({ 
+            message: "Failed to fetch listings", 
+            error: err.message 
+          });
         }
-    }
+      }
+    
 
     async getListingById(req, res) {
         try {

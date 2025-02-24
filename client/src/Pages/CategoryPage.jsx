@@ -6,72 +6,156 @@ import { useSelector, useDispatch } from "react-redux";
 import { setListings } from "../redux/state";
 import Loader from "../components/Loader";
 import ListingCard from "../components/ListingCard";
-import Footer from "../components/Footer"
+import Footer from "../components/Footer";
 
 const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
-  const { category } = useParams()
-
-  const dispatch = useDispatch()
+  const { category } = useParams();
+  
+  // Filters
+  const [bedroomCount, setBedroomCount] = useState("");
+  const [bathroomCount, setBathroomCount] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  
+  const dispatch = useDispatch();
   const listings = useSelector((state) => state.listings);
 
   const getFeedListings = async () => {
     try {
-      const response = await fetch(
-          `http://localhost:3001/properties?category=${category}`,
-        {
-          method: "GET",
-        }
-      );
+      // Only add non-empty filters to query params
+      const queryParams = new URLSearchParams({
+        ...(category && { category }),
+        ...(bedroomCount && { bedroomCount }),
+        ...(bathroomCount && { bathroomCount }),
+        ...(minPrice && { minPrice }),
+        ...(maxPrice && { maxPrice }),
+      }).toString();
 
+      const response = await fetch(
+        `http://localhost:3001/properties?${queryParams}`,
+        { method: "GET" }
+      );
+      
       const data = await response.json();
-      dispatch(setListings({ listings: data }));
+      
+      // Client-side strict filtering
+      const filteredListings = data.filter(listing => {
+        // Must match ALL specified conditions
+        if (category && listing.category !== category) {
+          return false;
+        }
+        
+        if (bedroomCount && listing.bedroomCount !== parseInt(bedroomCount)) {
+          return false;
+        }
+        
+        if (bathroomCount && listing.bathroomCount !== parseInt(bathroomCount)) {
+          return false;
+        }
+        
+        if (minPrice && listing.price < parseInt(minPrice)) {
+          return false;
+        }
+        
+        if (maxPrice && listing.price > parseInt(maxPrice)) {
+          return false;
+        }
+        
+        return true;
+      });
+
+      dispatch(setListings({ listings: filteredListings }));
       setLoading(false);
     } catch (err) {
       console.log("Fetch Listings Failed", err.message);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    setLoading(true);
     getFeedListings();
-  }, [category]);
+  }, [category, bedroomCount, bathroomCount, minPrice, maxPrice]);
 
-  return loading ? (
-    <Loader />
-  ) : (
+  return (
     <>
       <Navbar />
-      <h1 className="title-list">{category} listings</h1>
-      <div className="list">
-        {listings?.map(
-          ({
-            _id,
-            creator,
-            listingPhotoPaths,
-            city,
-            province,
-            country,
-            category,
-            type,
-            price,
-            booking = false,
-          }) => (
-            <ListingCard
-              listingId={_id}
-              creator={creator}
-              listingPhotoPaths={listingPhotoPaths}
-              city={city}
-              province={province}
-              country={country}
-              category={category}
-              type={type}
-              price={price}
-              booking={booking}
-            />
-          )
-        )}
+      <h1 className="title-list">{category} Listings</h1>
+      
+      <div className="filter-container">
+        <select 
+          value={bedroomCount} 
+          onChange={(e) => setBedroomCount(e.target.value)}
+        >
+          <option value="">Select Bedrooms</option>
+          <option value="1">1 Bedroom</option>
+          <option value="2">2 Bedrooms</option>
+          <option value="3">3 Bedrooms</option>
+          <option value="4">4 Bedrooms</option>
+        </select>
+
+        <select 
+          value={bathroomCount} 
+          onChange={(e) => setBathroomCount(e.target.value)}
+        >
+          <option value="">Select Bathrooms</option>
+          <option value="1">1 Bathroom</option>
+          <option value="2">2 Bathrooms</option>
+          <option value="3">3 Bathrooms</option>
+        </select>
+
+        <input
+          type="number"
+          placeholder="Min Price"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Max Price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+        />
       </div>
-      <Footer/>
+
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className="list">
+          {listings?.length === 0 ? (
+            <p>No properties match all selected filters. Try adjusting your criteria.</p>
+          ) : (
+            listings?.map(({
+              _id,
+              creator,
+              listingPhotoPaths,
+              city,
+              province,
+              country,
+              category,
+              type,
+              price,
+              booking = false,
+            }) => (
+              <ListingCard
+                key={_id}
+                listingId={_id}
+                creator={creator}
+                listingPhotoPaths={listingPhotoPaths}
+                city={city}
+                province={province}
+                country={country}
+                category={category}
+                type={type}
+                price={price}
+                booking={booking}
+              />
+            ))
+          )}
+        </div>
+      )}
+      <Footer />
     </>
   );
 };
