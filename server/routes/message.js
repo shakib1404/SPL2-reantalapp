@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const Message = require("../models/Message");
+const Message = require("../Models/Message");
 
 class MessageController {
     constructor() {
