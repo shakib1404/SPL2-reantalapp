@@ -24,8 +24,8 @@ const UpdatePage = () => {
   const [formLocation, setFormLocation] = useState({
     streetAddress: "",
     aptSuit: "",
-    city: "",
-    province: "",
+    thana: "",
+    postcode: "",
     country: "",
     latitude: null, // Add latitude
     longitude: null, // Add longitude
@@ -136,8 +136,8 @@ const UpdatePage = () => {
         setFormLocation({
           streetAddress: data.streetAddress,
           aptSuit: data.aptSuit,
-          city: data.city,
-          province: data.province,
+          thana: data.thana,
+          postcode: data.postcode,
           country: data.country,
           latitude: data.latitude,
           longitude: data.longitude,
@@ -175,8 +175,8 @@ const UpdatePage = () => {
       listingForm.append("type", type);
       listingForm.append("streetAddress", formLocation.streetAddress);
       listingForm.append("aptSuit", formLocation.aptSuit);
-      listingForm.append("city", formLocation.city);
-      listingForm.append("province", formLocation.province);
+      listingForm.append("thana", formLocation.thana);
+      listingForm.append("postcode", formLocation.postcode);
       listingForm.append("country", formLocation.country);
       listingForm.append("guestCount", guestCount);
       listingForm.append("bathroomCount", bathroomCount);
@@ -309,12 +309,12 @@ const UpdatePage = () => {
                 />
               </div>
               <div className="location">
-                <p>City</p>
+                <p>Thana</p>
                 <input
                   type="text"
-                  placeholder="City"
-                  name="city"
-                  value={formLocation.city}
+                  placeholder="Thana"
+                  name="thana"
+                  value={formLocation.thana}
                   onChange={handleChangeLocation}
                   required
                 />
@@ -322,12 +322,12 @@ const UpdatePage = () => {
             </div>
             <div className="half">
               <div className="location">
-                <p>Province</p>
+                <p>Postcode</p>
                 <input
                   type="text"
-                  placeholder="Province"
-                  name="province"
-                  value={formLocation.province}
+                  placeholder="Postcode"
+                  name="postcode"
+                  value={formLocation.postcode}
                   onChange={handleChangeLocation}
                   required
                 />
@@ -336,9 +336,9 @@ const UpdatePage = () => {
                 <p>Country</p>
                 <input
                   type="text"
-                  placeholder="country"
+                  placeholder="Bangladesh"
                   name="country"
-                  value={formLocation.country}
+                  value={formLocation.country||"Bangladesh"}
                   onChange={handleChangeLocation}
                   required
                 />

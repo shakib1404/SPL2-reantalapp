@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Message = require("../Models/Message");
+const Property = require("../Models/Listing");
 
 class MessageController {
     constructor() {
@@ -9,20 +10,32 @@ class MessageController {
     }
 
     initializeRoutes() {
-        this.router.get("/:listingId", this.getMessagesByListingAndUser.bind(this));
-        this.router.post("/", this.createMessage.bind(this));
+        this.router.get("/:listingId/conversation", this.getMessagesByListingAndUsers.bind(this));
+        this.router.post("/create", this.createMessage.bind(this));
         this.router.get("/inbox/:userId", this.getInbox.bind(this));
     }
 
-    async getMessagesByListingAndUser(req, res) {
+    // Get messages by listing ID, between two users (senderId and receiverId)
+    async getMessagesByListingAndUsers(req, res) {
         try {
             const { listingId } = req.params;
-            const { userId } = req.query;
+            const { senderId, receiverId } = req.query;
 
+            // Validate the input ids
+            if (!mongoose.Types.ObjectId.isValid(listingId) || 
+                !mongoose.Types.ObjectId.isValid(senderId) || 
+                !mongoose.Types.ObjectId.isValid(receiverId)) {
+                return res.status(400).json({ error: "Invalid listing ID or user ID" });
+            }
+
+            // Fetch messages exchanged between sender and receiver for the listing
             const messages = await Message.find({
                 listingId,
-                $or: [{ senderId: userId }, { receiverId: userId }],
-            });
+                $or: [
+                    { senderId, receiverId },
+                    { senderId: receiverId, receiverId: senderId }
+                ]
+            }).sort({ createdAt: 1 }); // Sort messages by timestamp in ascending order
 
             res.json(messages);
         } catch (error) {
@@ -31,6 +44,7 @@ class MessageController {
         }
     }
 
+    // Create a new message
     async createMessage(req, res) {
         try {
             const { senderId, receiverId, listingId, text } = req.body;
@@ -39,7 +53,7 @@ class MessageController {
                 receiverId,
                 listingId,
                 text,
-                timestamp: new Date(),
+                timestamp: new Date()
             });
 
             const savedMessage = await newMessage.save();
@@ -50,6 +64,7 @@ class MessageController {
         }
     }
 
+    // Get inbox for a user - shows conversations with other users for the properties they are involved with
     async getInbox(req, res) {
         const { userId } = req.params;
 
@@ -60,7 +75,7 @@ class MessageController {
                 { $match: { receiverId: userObjectId } },
                 {
                     $group: {
-                        _id: "$senderId",
+                        _id: "$senderId", // Group by senderId
                         listingId: { $first: "$listingId" },
                         receiverId: { $first: "$receiverId" },
                         createdAt: { $first: "$createdAt" },
@@ -68,7 +83,7 @@ class MessageController {
                 },
                 {
                     $lookup: {
-                        from: "users",
+                        from: "users", // Lookup sender info
                         localField: "_id",
                         foreignField: "_id",
                         as: "senderUser",
@@ -76,7 +91,7 @@ class MessageController {
                 },
                 {
                     $lookup: {
-                        from: "users",
+                        from: "users", // Lookup receiver info
                         localField: "receiverId",
                         foreignField: "_id",
                         as: "receiverUser",
@@ -109,7 +124,6 @@ class MessageController {
             ]);
 
             console.log(conversations);
-
             res.json(conversations);
         } catch (err) {
             console.error("Error fetching conversations:", err);

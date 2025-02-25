@@ -63,23 +63,20 @@ const ListingDetails = () => {
     }
   };
 
-  // Determine if the user is a landlord
   const currentUserRole = async () => {
-    if (!customerId) return; // Ensure user is defined before proceeding
+    if (!customerId || !listingId) return; // Ensure both user and listing are defined
+  
     try {
-      const response = await fetch(
-        `http://localhost:3001/users/${customerId}/properties`
-      );
-      const data = await response.json();
-
-      // Check if the user has any properties in the propertyList of creator
-      const landlord = data.some((property) => property.creator._id === customerId);
-      setIsLandlord(landlord);
+      const response = await fetch(`http://localhost:3001/properties/${listingId}`);
+      const listingData = await response.json();
+  
+      // Check if the current user is the creator (owner) of this property
+      const isOwner = listingData.creator._id === customerId;
+      setIsLandlord(isOwner); // Update state accordingly
     } catch (error) {
-      console.error("Error checking landlord status:", error);
+      console.error("Error checking property ownership:", error);
     }
   };
-
   // Handle booking date change
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -168,7 +165,7 @@ const ListingDetails = () => {
         </div>
 
         <h2>
-          {listing.type} in {listing.city}, {listing.province},{" "}
+          {listing.type} in {listing.thana}, {listing.postcode},{" "}
           {listing.country}
         </h2>
         <p>

@@ -23,8 +23,8 @@ const CreateListing = () => {
   const [formLocation, setFormLocation] = useState({
     streetAddress: "",
     aptSuit: "",
-    city: "",
-    province: "",
+    thana: "",
+    postcode: "",
     country: "",
     latitude: null, // Add latitude
     longitude: null, // Add longitude
@@ -131,9 +131,9 @@ const CreateListing = () => {
       listingForm.append("type", type);
       listingForm.append("streetAddress", formLocation.streetAddress);
       listingForm.append("aptSuit", formLocation.aptSuit);
-      listingForm.append("city", formLocation.city);
-      listingForm.append("province", formLocation.province);
-      listingForm.append("country", formLocation.country);
+      listingForm.append("thana", formLocation.thana);
+      listingForm.append("postcode", formLocation.postcode);
+      listingForm.append("country", formLocation.country||"Bangladesh");
       listingForm.append("guestCount", guestCount);
       listingForm.append("bathroomCount", bathroomCount);
       listingForm.append("bedroomCount", bedroomCount);
@@ -260,12 +260,12 @@ const CreateListing = () => {
                 />
               </div>
               <div className="location">
-                <p>City</p>
+                <p>Thana</p>
                 <input
                   type="text"
-                  placeholder="City"
-                  name="city"
-                  value={formLocation.city}
+                  placeholder="Thana"
+                  name="thana"
+                  value={formLocation.thana}
                   onChange={handleChangeLocation}
                   required
                 />
@@ -273,12 +273,12 @@ const CreateListing = () => {
             </div>
             <div className="half">
               <div className="location">
-                <p>Province</p>
+                <p>PostCode</p>
                 <input
                   type="text"
-                  placeholder="Province"
-                  name="province"
-                  value={formLocation.province}
+                  placeholder="Postcode"
+                  name="postcode"
+                  value={formLocation.postcode}
                   onChange={handleChangeLocation}
                   required
                 />
@@ -287,9 +287,9 @@ const CreateListing = () => {
                 <p>Country</p>
                 <input
                   type="text"
-                  placeholder="country"
+                  placeholder="Bangladesh"
                   name="country"
-                  value={formLocation.country}
+                  value={formLocation.country || "Bangladesh"}
                   onChange={handleChangeLocation}
                   required
                 />
