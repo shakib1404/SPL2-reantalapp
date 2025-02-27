@@ -115,15 +115,17 @@ const ChatPage = () => {
     socket.emit("joinRoom", listingId);
     
     // Listen for incoming messages
-    socket.on("receiveMessage", (newMessage) => {
-      if (
-        (newMessage.senderId === currentUser._id || newMessage.receiverId === currentUser._id) &&
-        newMessage.listingId === listingId
-      ) {
-        // Add new message to the state without refreshing
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    });
+    // Listen for incoming messages
+socket.on("receiveMessage", (newMessage) => {
+  if (
+    ((newMessage.senderId === currentUser._id || newMessage.senderId === currentUser._id.toString()) || 
+     (newMessage.receiverId === currentUser._id || newMessage.receiverId === currentUser._id.toString())) &&
+    newMessage.listingId === listingId
+  ) {
+    // Add new message to the state without refreshing
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  }
+});
     
     // Cleanup socket listeners on component unmount
     return () => {
@@ -136,52 +138,47 @@ const ChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!newMessage.trim()) {
-      alert("Message cannot be empty!");
-      return;
+  // In your sendMessage function in ChatPage:
+const sendMessage = async () => {
+  if (!newMessage.trim()) {
+    alert("Message cannot be empty!");
+    return;
+  }
+  
+  try {
+    const messageData = {
+      senderId: currentUser._id,
+      receiverId: otherUserInfo._id,
+      listingId,
+      text: newMessage,
+    };
+
+    // Save message to database first
+    const response = await fetch("http://localhost:3001/messages/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(messageData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send message");
     }
     
-    if (!otherUserInfo || !otherUserInfo._id) {
-      alert("Cannot determine message recipient.");
-      return;
-    }
-  
-    try {
-      const messageData = {
-        senderId: currentUser._id,
-        receiverId: otherUserInfo._id,  // Ensure receiverId is set
-        listingId,
-        text: newMessage,
-      };
-  
-      // Optimistically update UI with the new message
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { ...messageData, createdAt: new Date().toISOString() }, // Add timestamp for display
-      ]);
-  
-      // Emit message via socket
-      socket.emit("sendMessage", messageData);
-  
-      // Save message to database
-      const response = await fetch("http://localhost:3001/messages/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(messageData),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to send message");
-      }
-  
-      // Clear input field
-      setNewMessage("");
-    } catch (error) {
-      console.error("Error sending message:", error);
-      alert("Failed to send message. Please try again.");
-    }
-  };
+    // Get the saved message with proper ID and timestamps
+    const savedMessage = await response.json();
+    
+    // Emit message via socket with the saved message data
+    socket.emit("sendMessage", savedMessage);
+    
+    // No need to update messages state here as it will be updated via socket
+    
+    // Clear input field
+    setNewMessage("");
+  } catch (error) {
+    console.error("Error sending message:", error);
+    alert("Failed to send message. Please try again.");
+  }
+};
   
   // Handle Enter key press
   const handleKeyPress = (e) => {
@@ -255,7 +252,7 @@ const ChatPage = () => {
               {messages.map((msg, index) => (
                 <div
                   key={msg._id || index}
-                  className={`message ${msg.senderId === currentUser._id ? "my-message" : "other-message"}`}
+                  className={`message ${msg.senderId === currentUser._id? "my-message" : "other-message"}`}
                 >
                   <div className="message-content">
                     <p>{msg.text}</p>
