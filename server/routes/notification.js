@@ -40,6 +40,10 @@ class NotificationController {
             });
 
             const savedNotification = await newNotification.save();
+            const io = req.app.get('io');
+            if (io) {
+              io.to(`notification-${userId}`).emit("newNotification", savedNotification);
+            }
             res.status(201).json(savedNotification);
         } catch (err) {
             res.status(500).json({ error: 'Failed to create notification' });
