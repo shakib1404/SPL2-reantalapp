@@ -16,18 +16,15 @@ const LandlordInboxPage = () => {
       navigate("/login");
       return;
     }
-
     const fetchConversations = async () => {
       try {
         setLoading(true);
         const response = await fetch(
           `http://localhost:3001/messages/inbox/${currentUser._id}`
         );
-
         if (!response.ok) {
           throw new Error("Failed to fetch conversations");
         }
-
         const data = await response.json();
         setConversations(data);
       } catch (error) {
@@ -36,7 +33,6 @@ const LandlordInboxPage = () => {
         setLoading(false);
       }
     };
-
     fetchConversations();
   }, [currentUser, navigate]);
 
@@ -73,11 +69,26 @@ const LandlordInboxPage = () => {
                     navigate(`/chat/${conv.listingId}?tenant=${conv.senderId}`)
                   }
                 >
-                  <div className="conversation-header">
-                    <h3>{conv.propertyTitle || "Property"}</h3>
-                    <span className="date">{formatDate(conv.createdAt)}</span>
+                  <div className="conversation-content">
+                    <div className="profile-image-container">
+                      <img 
+                        src={`http://localhost:3001/${conv.senderProfilePic.replace(
+                "public",
+                ""
+              )}` || "/default-profile.png"} 
+                        alt={`${conv.senderName}'s profile`}
+                        className="profile-image"
+                      />
+                    </div>
+                    <div className="conversation-details">
+                      <div className="conversation-header">
+                        <h3>{conv.propertyTitle || "Property"}</h3>
+                        <span className="date">{formatDate(conv.createdAt)}</span>
+                      </div>
+                      <p className="tenant-name">From: {conv.senderName || "Unknown"}</p>
+                      {/* Can add preview message here if available */}
+                    </div>
                   </div>
-                  <p className="tenant-name">From: {conv.senderName || "Unknown"}</p>
                 </div>
               )
             ))}

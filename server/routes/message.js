@@ -115,6 +115,9 @@ class MessageController {
                                 { $ifNull: ["$receiverUser.lastname", ""] },
                             ],
                         },
+                        senderProfilePic: {
+                            $ifNull: ["$senderUser.profileimagePath", "/default-profile.png"],
+                        },
                         listingId: 1,
                         senderId: { $toString: "$_id" },
                         receiverId: { $toString: "$receiverId" },
