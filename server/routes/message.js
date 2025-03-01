@@ -2,6 +2,53 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Message = require("../Models/Message");
 const Property = require("../Models/Listing");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, '../public/uploads');
+        
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        // Generate unique filename with original extension
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'file-' + uniqueSuffix + ext);
+    }
+});
+
+// File filter to restrict file types if needed
+const fileFilter = (req, file, cb) => {
+    // Accept images, documents, PDFs, etc.
+    const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain'
+    ];
+    
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Unsupported file type. Please upload an image, document, or PDF.'), false);
+    }
+};
+
+// Configure multer with max file size of 5MB
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 class MessageController {
     constructor() {
@@ -13,6 +60,10 @@ class MessageController {
         this.router.get("/:listingId/conversation", this.getMessagesByListingAndUsers.bind(this));
         this.router.post("/create", this.createMessage.bind(this));
         this.router.get("/inbox/:userId", this.getInbox.bind(this));
+        
+        // Add new routes for file uploads
+        this.router.post("/upload", upload.single('file'), this.uploadFile.bind(this));
+        this.router.get("/files/:filename", this.getFile.bind(this));
     }
 
     // Get messages by listing ID, between two users (senderId and receiverId)
@@ -47,12 +98,15 @@ class MessageController {
     // Create a new message
     async createMessage(req, res) {
         try {
-            const { senderId, receiverId, listingId, text } = req.body;
+            const { senderId, receiverId, listingId, text, fileUrl, fileType, fileName } = req.body;
             const newMessage = new Message({
                 senderId,
                 receiverId,
                 listingId,
                 text,
+                fileUrl,
+                fileType,
+                fileName,
                 timestamp: new Date()
             });
 
@@ -64,7 +118,47 @@ class MessageController {
         }
     }
 
+    // Upload file and return file path
+    uploadFile(req, res) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ error: "No file uploaded" });
+            }
+            
+            // Get the file path relative to the public directory
+            const filePath = `/uploads/${req.file.filename}`;
+            
+            res.status(200).json({
+                message: "File uploaded successfully",
+                filePath: filePath,
+                fileName: req.file.originalname,
+                fileType: req.file.mimetype
+            });
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            res.status(500).json({ error: "File upload failed" });
+        }
+    }
+
+    // Get file by filename
+    getFile(req, res) {
+        try {
+            const { filename } = req.params;
+            const filePath = path.join(__dirname, '../public/uploads', filename);
+            
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).json({ error: "File not found" });
+            }
+            
+            res.sendFile(filePath);
+        } catch (error) {
+            console.error("Error serving file:", error);
+            res.status(500).json({ error: "Failed to serve file" });
+        }
+    }
+
     // Get inbox for a user - shows conversations with other users for the properties they are involved with
+   
     async getInbox(req, res) {
         const { userId } = req.params;
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
+import EmojiPicker from "emoji-picker-react";
 import "../styles/chat.scss";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -22,8 +23,13 @@ const ChatPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLandlord, setIsLandlord] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const currentUser = useSelector((state) => state.user);
 
@@ -115,17 +121,16 @@ const ChatPage = () => {
     socket.emit("joinRoom", listingId);
     
     // Listen for incoming messages
-    // Listen for incoming messages
-socket.on("receiveMessage", (newMessage) => {
-  if (
-    ((newMessage.senderId === currentUser._id || newMessage.senderId === currentUser._id.toString()) || 
-     (newMessage.receiverId === currentUser._id || newMessage.receiverId === currentUser._id.toString())) &&
-    newMessage.listingId === listingId
-  ) {
-    // Add new message to the state without refreshing
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-  }
-});
+    socket.on("receiveMessage", (newMessage) => {
+      if (
+        ((newMessage.senderId === currentUser._id || newMessage.senderId === currentUser._id.toString()) || 
+         (newMessage.receiverId === currentUser._id || newMessage.receiverId === currentUser._id.toString())) &&
+        newMessage.listingId === listingId
+      ) {
+        // Add new message to the state without refreshing
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+    });
     
     // Cleanup socket listeners on component unmount
     return () => {
@@ -138,47 +143,130 @@ socket.on("receiveMessage", (newMessage) => {
     scrollToBottom();
   }, [messages]);
 
-  // In your sendMessage function in ChatPage:
-const sendMessage = async () => {
-  if (!newMessage.trim()) {
-    alert("Message cannot be empty!");
-    return;
-  }
-  
-  try {
-    const messageData = {
-      senderId: currentUser._id,
-      receiverId: otherUserInfo._id,
-      listingId,
-      text: newMessage,
-    };
+  // Add emoji to message
+  const handleEmojiClick = (emojiObject) => {
+    setNewMessage(prevMessage => prevMessage + emojiObject.emoji);
+    setShowEmojiPicker(false);
+  };
 
-    // Save message to database first
-    const response = await fetch("http://localhost:3001/messages/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(messageData),
-    });
+  // Toggle emoji picker
+  const toggleEmojiPicker = () => {
+    setShowEmojiPicker(!showEmojiPicker);
+  };
 
-    if (!response.ok) {
-      throw new Error("Failed to send message");
+  // Handle file selection
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setSelectedFile(file);
+    
+    // Create file preview
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFilePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFilePreview(null);
+    }
+  };
+
+  // Clear selected file
+  const clearSelectedFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Upload file to server
+  const uploadFile = async () => {
+    if (!selectedFile) return null;
+    
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("listingId", listingId);
+      formData.append("senderId", currentUser._id);
+      
+      const response = await fetch("http://localhost:3001/messages/upload", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to upload file");
+      }
+      
+      const fileData = await response.json();
+      setIsUploading(false);
+      return fileData.filePath;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setIsUploading(false);
+      return null;
+    }
+  };
+
+  // Send message with text and/or file
+  const sendMessage = async () => {
+    // Check if both message is empty and no file selected
+    if (!newMessage.trim() && !selectedFile) {
+      alert("Message cannot be empty or select a file to send!");
+      return;
     }
     
-    // Get the saved message with proper ID and timestamps
-    const savedMessage = await response.json();
-    
-    // Emit message via socket with the saved message data
-    socket.emit("sendMessage", savedMessage);
-    
-    // No need to update messages state here as it will be updated via socket
-    
-    // Clear input field
-    setNewMessage("");
-  } catch (error) {
-    console.error("Error sending message:", error);
-    alert("Failed to send message. Please try again.");
-  }
-};
+    try {
+      let filePath = null;
+      
+      // Upload file if selected
+      if (selectedFile) {
+        filePath = await uploadFile();
+        if (!filePath && !newMessage.trim()) {
+          alert("Failed to upload file. Please try again.");
+          return;
+        }
+      }
+      
+      const messageData = {
+        senderId: currentUser._id,
+        receiverId: otherUserInfo._id,
+        listingId,
+        text: newMessage.trim() || (selectedFile ? `Sent a file: ${selectedFile.name}` : ""),
+        fileUrl: filePath,
+        fileType: selectedFile ? selectedFile.type : null,
+        fileName: selectedFile ? selectedFile.name : null,
+      };
+
+      // Save message to database first
+      const response = await fetch("http://localhost:3001/messages/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(messageData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send message");
+      }
+      
+      // Get the saved message with proper ID and timestamps
+      const savedMessage = await response.json();
+      
+      // Emit message via socket with the saved message data
+      socket.emit("sendMessage", savedMessage);
+      
+      // Clear input field and selected file
+      setNewMessage("");
+      clearSelectedFile();
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
+    }
+  };
   
   // Handle Enter key press
   const handleKeyPress = (e) => {
@@ -252,10 +340,29 @@ const sendMessage = async () => {
               {messages.map((msg, index) => (
                 <div
                   key={msg._id || index}
-                  className={`message ${msg.senderId === currentUser._id? "my-message" : "other-message"}`}
+                  className={`message ${msg.senderId === currentUser._id ? "my-message" : "other-message"}`}
                 >
                   <div className="message-content">
                     <p>{msg.text}</p>
+                    {msg.fileUrl && (
+                      <div className="file-attachment">
+                        {msg.fileType && msg.fileType.startsWith('image/') ? (
+                          <img 
+                            src={`http://localhost:3001${msg.fileUrl}`} 
+                            alt="Attached file" 
+                            className="attached-image"
+                            onClick={() => window.open(`http://localhost:3001${msg.fileUrl}`, '_blank')}
+                          />
+                        ) : (
+                          <div className="file-download">
+                            <i className="fas fa-file"></i>
+                            <a href={`http://localhost:3001${msg.fileUrl}`} target="_blank" rel="noopener noreferrer">
+                              {msg.fileName || 'Download File'}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="message-time">
                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -276,6 +383,42 @@ const sendMessage = async () => {
         </div>
 
         <div className="message-input">
+          {selectedFile && (
+            <div className="file-preview">
+              {filePreview ? (
+                <img src={filePreview} alt="Preview" className="image-preview" />
+              ) : (
+                <div className="file-name">{selectedFile.name}</div>
+              )}
+              <button className="remove-file" onClick={clearSelectedFile}>
+                ✕
+              </button>
+            </div>
+          )}
+          
+          <div className="input-actions">
+            <button className="emoji-button" onClick={toggleEmojiPicker}>
+              😊
+            </button>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+            
+            <button className="attachment-button" onClick={() => fileInputRef.current.click()}>
+              📎
+            </button>
+          </div>
+          
+          {showEmojiPicker && (
+            <div className="emoji-picker-container">
+              <EmojiPicker onEmojiClick={handleEmojiClick} />
+            </div>
+          )}
+          
           <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -283,8 +426,11 @@ const sendMessage = async () => {
             placeholder="Type your message..."
             rows={2}
           />
-          <button onClick={sendMessage} disabled={!newMessage.trim()}>
-            Send
+          <button 
+            onClick={sendMessage} 
+            disabled={(isUploading || (!newMessage.trim() && !selectedFile))}
+          >
+            {isUploading ? "Uploading..." : "Send"}
           </button>
         </div>
       </div>

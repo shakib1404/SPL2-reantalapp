@@ -17,6 +17,20 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const handleSearch = () => {
+    if (search) {
+      navigate(`/properties/search/${search}`);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && search) {
+      handleSearch();
+    }
+  };
+  
+  
+
   const checkLandlordStatus = async () => {
     if (!user) return; // Ensure user is defined before proceeding
     try {
@@ -62,20 +76,18 @@ const Navbar = () => {
 
       {/* Search Bar */}
       <div className="navbar_search">
-        <input
-          type="text"
-          placeholder="Search ..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <IconButton disabled={search === ""}>
-          <Search
-            sx={{ color: variables.pinkred }}
-            onClick={() => {
-              navigate(`/properties/search/${search}`);
-            }}
-          />
-        </IconButton>
+      <input
+  type="text"
+  placeholder="Search ..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  onKeyDown={handleKeyDown} // Added event for Enter key
+/>
+
+<IconButton disabled={search === ""} onClick={handleSearch}>
+  <Search sx={{ color: variables.pinkred }} />
+</IconButton>
+
       </div>
 
       {/* Right Section */}
