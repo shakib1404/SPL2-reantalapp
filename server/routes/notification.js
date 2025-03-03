@@ -1,88 +1,102 @@
-const express = require('express');
-const Notification = require('../Models/notification');
-const router = express.Router();
+const express = require("express");
+const Notification = require("../Models/notification");
 
-// Get all notifications for a user
-router.get('/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const notifications = await Notification.find({ userId })
-      .sort({ timestamp: -1 }); // Sort by most recent
-    res.status(200).json(notifications);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch notifications' });
-  }
-});
-
-// Create a new notification
-router.post('/', async (req, res) => {
-  const { userId, senderId, listingId,type, message } = req.body;
-
-  try {
-    const newNotification = new Notification({
-      userId,
-      senderId,
-      listingId,
-      type,
-      message,
-    });
-
-    const savedNotification = await newNotification.save();
-    res.status(201).json(savedNotification);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create notification' });
-  }
-});
-
-// Mark a notification as read
-router.patch('/:id', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const updatedNotification = await Notification.findByIdAndUpdate(
-      id,
-      { isRead: true },
-      { new: true }
-    );
-
-    if (!updatedNotification) {
-      return res.status(404).json({ error: 'Notification not found' });
+class NotificationController {
+    constructor() {
+        this.router = express.Router();
+        this.initializeRoutes();
     }
 
-    res.status(200).json(updatedNotification);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update notification' });
-  }
-});
-
-// Delete a notification
-router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const deletedNotification = await Notification.findByIdAndDelete(id);
-
-    if (!deletedNotification) {
-      return res.status(404).json({ error: 'Notification not found' });
+    initializeRoutes() {
+        this.router.get('/:userId', this.getNotificationsByUser.bind(this));
+        this.router.post('/', this.createNotification.bind(this));
+        this.router.patch('/:id', this.markNotificationAsRead.bind(this));
+        this.router.delete('/:id', this.deleteNotification.bind(this));
+        this.router.delete('/user/:userId', this.deleteAllNotificationsForUser.bind(this));
     }
 
-    res.status(200).json({ message: 'Notification deleted' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete notification' });
-  }
-});
+    async getNotificationsByUser(req, res) {
+        const { userId } = req.params;
 
-// Delete all notifications for a user
-router.delete('/user/:userId', async (req, res) => {
-  const { userId } = req.params;
+        try {
+            const notifications = await Notification.find({ userId })
+                .sort({ timestamp: -1 });
+            res.status(200).json(notifications);
+        } catch (err) {
+            res.status(500).json({ error: 'Failed to fetch notifications' });
+        }
+    }
 
-  try {
-    await Notification.deleteMany({ userId });
-    res.status(200).json({ message: 'All notifications deleted' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete notifications' });
-  }
-});
+    async createNotification(req, res) {
+        const { userId, senderId, listingId, type, message } = req.body;
 
-module.exports = router;
+        try {
+            const newNotification = new Notification({
+                userId,
+                senderId,
+                listingId,
+                type,
+                message,
+            });
+
+            const savedNotification = await newNotification.save();
+            const io = req.app.get('io');
+            if (io) {
+              io.to(`notification-${userId}`).emit("newNotification", savedNotification);
+            }
+            res.status(201).json(savedNotification);
+        } catch (err) {
+            res.status(500).json({ error: 'Failed to create notification' });
+        }
+    }
+
+    async markNotificationAsRead(req, res) {
+        const { id } = req.params;
+
+        try {
+            const updatedNotification = await Notification.findByIdAndUpdate(
+                id,
+                { isRead: true },
+                { new: true }
+            );
+
+            if (!updatedNotification) {
+                return res.status(404).json({ error: 'Notification not found' });
+            }
+
+            res.status(200).json(updatedNotification);
+        } catch (err) {
+            res.status(500).json({ error: 'Failed to update notification' });
+        }
+    }
+
+    async deleteNotification(req, res) {
+        const { id } = req.params;
+
+        try {
+            const deletedNotification = await Notification.findByIdAndDelete(id);
+
+            if (!deletedNotification) {
+                return res.status(404).json({ error: 'Notification not found' });
+            }
+
+            res.status(200).json({ message: 'Notification deleted' });
+        } catch (err) {
+            res.status(500).json({ error: 'Failed to delete notification' });
+        }
+    }
+
+    async deleteAllNotificationsForUser(req, res) {
+        const { userId } = req.params;
+
+        try {
+            await Notification.deleteMany({ userId });
+            res.status(200).json({ message: 'All notifications deleted' });
+        } catch (err) {
+            res.status(500).json({ error: 'Failed to delete notifications' });
+        }
+    }
+}
+
+const notificationController = new NotificationController();
+module.exports = notificationController.router;

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../styles/NotificationPage.scss"; // SCSS file for styling
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const NotificationPage = () => {
   const { userId } = useParams();
@@ -104,6 +106,8 @@ const NotificationPage = () => {
   
 
   return (
+    <>
+    <Navbar />
     <div className="notification-page">
       <h1 className="title">Your Notifications</h1>
 
@@ -157,6 +161,8 @@ const NotificationPage = () => {
         <div className="no-notifications">No notifications available</div>
       )}
     </div>
+    <Footer/>
+    </>
   );
 };
 

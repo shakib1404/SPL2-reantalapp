@@ -11,6 +11,30 @@
   }
 }
 
+.filter-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 100px;
+
+  select, input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  button {
+    padding: 10px 15px;
+    background-color: $blue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+}
+
+
 .list {
   padding: 0 100px 120px;
   display: flex;

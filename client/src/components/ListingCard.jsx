@@ -16,8 +16,8 @@ const ListingCard = ({
   listingId,
   creator,
   listingPhotoPaths,
-  city,
-  province,
+  thana,
+  postcode,
   country,
   category,
   type,
@@ -181,7 +181,7 @@ const ListingCard = ({
       </div>
 
       <h3>
-        {city}, {province}, {country}
+        {thana}, {postcode}, {country}
       </h3>
       <p>{category}</p>
 

@@ -40,8 +40,8 @@ const TripList = () => {
          listingId={listingId._id}
          creator={customerId._id}
          listingPhotoPaths={listingId.listingPhotoPaths}
-         city={listingId.city}
-         province={listingId.province}
+         thana={listingId.thana}
+         postcode={listingId.postcode}
          category={listingId.category}
          startDate={startDate}
          endDate={endDate}

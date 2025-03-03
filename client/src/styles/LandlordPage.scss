@@ -1,0 +1,39 @@
+@import './variables.scss'; // Import your variables
+
+.inbox-page {
+  background-color: $lightgrey; // Light background for the inbox
+  padding: 20px; // Add some padding around the page
+  border-radius: 10px; // Rounded corners for the container
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+
+  h2 {
+    color: $blue; // Heading color
+    font-size: 24px; // Font size for the heading
+    margin-bottom: 20px; // Space below the heading
+  }
+
+  ul {
+    list-style-type: none; // Remove default list styling
+    padding: 0; // Remove default padding
+    margin: 0; // Remove default margin
+
+    li {
+      background-color: white; // White background for each conversation
+      padding: 15px; // Padding inside each list item
+      margin-bottom: 10px; // Space between list items
+      border-radius: 8px; // Rounded corners for list items
+      cursor: pointer; // Pointer cursor on hover
+      transition: background-color 0.3s ease; // Smooth transition for hover effect
+
+      &:hover {
+        background-color: $blue-light; // Change background on hover
+      }
+    }
+  }
+
+  p {
+    color: $darkgrey; // Color for the no messages text
+    font-size: 18px; // Font size for the paragraph
+    text-align: center; // Center the text
+  }
+}

@@ -48,8 +48,8 @@ const ReservationList = () => {
             listingId={listingId._id}
             creator={hostId._id}
             listingPhotoPaths={listingId.listingPhotoPaths}
-            city={listingId.city}
-            province={listingId.province}
+            thana={listingId.thana}
+            postcode={listingId.postcode}
             country={listingId.country}
             category={listingId.category}
             startDate={startDate}

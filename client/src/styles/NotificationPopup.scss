@@ -1,0 +1,76 @@
+.notification-popup-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 350px;
+  }
+  
+  .notification-popup {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 12px;
+    animation: slideIn 0.3s ease-out;
+    border-left: 4px solid #4caf50;
+    max-width: 100%;
+  }
+  
+  .notification-new {
+    animation: slideIn 0.3s ease-out, glow 2s ease-in-out;
+  }
+  
+  .notification-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .notification-type {
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+  }
+  
+  .notification-dismiss {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+  
+  .notification-dismiss:hover {
+    color: #333;
+  }
+  
+  .notification-popup-body {
+    color: #333;
+    font-size: 14px;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes glow {
+    0%, 100% {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    50% {
+      box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+    }
+  }

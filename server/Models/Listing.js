@@ -27,12 +27,12 @@ const ListingSchema=new mongoose.Schema(
             type:String,
             required:true,
         },
-        city:
+        thana:
         {
             type:String,
             required:true,
         },
-        province:
+        postcode:
         {
             type:String,
             required:true,
