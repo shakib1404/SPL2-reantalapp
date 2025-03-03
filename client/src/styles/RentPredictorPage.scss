@@ -1,0 +1,375 @@
+// RentPredictorPage.scss
+
+// Variables
+$primary-color: #3c6e71;
+$secondary-color: #284b63;
+$accent-color: #d9d9d9;
+$background-color: #f8f9fa;
+$text-color: #333333;
+$error-color: #d62828;
+$success-color: #588157;
+$shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+$border-radius: 8px;
+
+// Base styles
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: $background-color;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+
+// App container
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+  .App-header {
+    background-color: $secondary-color;
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    
+    h1 {
+      font-weight: 700;
+      font-size: 2.2rem;
+      margin: 0;
+    }
+  }
+  
+  .container {
+    flex: 1;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  
+  // Form styling
+  .form-container {
+    background-color: white;
+    border-radius: $border-radius;
+    box-shadow: $shadow;
+    padding: 2rem;
+    
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        
+        label {
+          font-weight: 600;
+          color: $secondary-color;
+        }
+        
+        input, select {
+          padding: 0.8rem 1rem;
+          border: 1px solid #e0e0e0;
+          border-radius: $border-radius;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          
+          &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
+          }
+          
+          &::placeholder {
+            color: #aaa;
+          }
+        }
+        
+        // Enhanced select styling for long location list
+        select {
+          max-height: 38px;
+          overflow-y: auto;
+          
+          // Customize scrollbar for webkit browsers
+          &::-webkit-scrollbar {
+            width: 6px;
+          }
+          
+          &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 4px;
+          }
+          
+          &::-webkit-scrollbar-thumb:hover {
+            background: #999;
+          }
+          
+          option {
+            padding: 8px;
+            
+            &:hover {
+              background-color: rgba($primary-color, 0.1);
+            }
+          }
+          
+          // When dropdown is open (focus state)
+          &:focus {
+            option {
+              padding: 10px;
+              line-height: 1.4;
+            }
+          }
+        }
+        
+        // New location search dropdown styling
+        &.location-search {
+          position: relative;
+          
+          input {
+            width: 100%;
+          }
+          
+          .location-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 0 0 $border-radius $border-radius;
+            box-shadow: $shadow;
+            z-index: 10;
+            margin-top: 2px;
+            width: 100%; // Ensure full width
+            min-width: 350px; // Set minimum width
+            
+            // Make dropdown extend beyond the input on small screens
+            @media (min-width: 576px) {
+              min-width: 400px;
+            }
+            
+            @media (min-width: 768px) {
+              min-width: 450px;
+              width: 120%; // Make it extend beyond input
+              left: -10%; // Center it
+            }
+            
+            // Scrollbar styling
+            &::-webkit-scrollbar {
+              width: 8px; // Slightly wider scrollbar
+            }
+            
+            &::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 4px;
+            }
+            
+            &::-webkit-scrollbar-thumb {
+              background: #bbb;
+              border-radius: 4px;
+            }
+            
+            &::-webkit-scrollbar-thumb:hover {
+              background: #999;
+            }
+            
+            .location-option {
+              padding: 0.8rem 1rem;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              white-space: normal; // Allow text wrapping
+              line-height: 1.4;
+              
+              &:hover {
+                background-color: rgba($primary-color, 0.1);
+              }
+              
+              &:not(:last-child) {
+                border-bottom: 1px solid #f0f0f0;
+              }
+            }
+          }
+        }
+      }
+      
+      button {
+        background-color: $primary-color;
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: $border-radius;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 0.5rem;
+        
+        &:hover {
+          background-color: darken($primary-color, 10%);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba($primary-color, 0.2);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+        
+        &:disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+      }
+    }
+  }
+  
+  // Results styling
+  .result-container {
+    background-color: white;
+    border-radius: $border-radius;
+    box-shadow: $shadow;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    
+    .error {
+      background-color: rgba($error-color, 0.1);
+      color: $error-color;
+      padding: 1rem;
+      border-radius: $border-radius;
+      border-left: 4px solid $error-color;
+    }
+    
+    .prediction {
+      text-align: center;
+      
+      h2 {
+        color: $secondary-color;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        position: relative;
+        
+        &:after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 80px;
+          height: 3px;
+          background-color: $primary-color;
+        }
+      }
+      
+      .prediction-amount {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: $primary-color;
+        margin: 2rem 0;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      
+      p {
+        color: #666666;
+        line-height: 1.6;
+        max-width: 90%;
+        margin: 0 auto;
+      }
+    }
+  }
+}
+
+// Animation for prediction
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Animation for dropdown
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.prediction {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.location-dropdown {
+  animation: slideDown 0.2s ease forwards;
+}
+
+// Highlight matching text in location dropdown
+.location-option .highlight {
+  background-color: rgba($primary-color, 0.2);
+  font-weight: 600;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .App {
+    .container {
+      margin: 1rem auto;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .App {
+    .App-header {
+      padding: 1.5rem 1rem;
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+    
+    .form-container, .result-container {
+      padding: 1.5rem;
+    }
+    
+    .prediction {
+      .prediction-amount {
+        font-size: 2.2rem;
+      }
+    }
+    
+    .location-dropdown {
+      max-height: 250px; // Smaller on mobile
+      width: 100%; // Full width on mobile
+    }
+  }
+}
