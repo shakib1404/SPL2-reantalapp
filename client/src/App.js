@@ -20,6 +20,7 @@ import ForgotPasswordPage from './Pages/ForgetPasswordPage';
 import UpdatePage from './Pages/UpdatePage';
 import LandlordInboxPage from './Pages/LandlordInboxPage';
 import NotificationPopup from './components/NotificationPopup';
+import RentPredictorPage from './Pages/RentPredictorPage';
 
 function App() {
   
@@ -34,6 +35,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/rent-predictor" element={<RentPredictorPage />} />
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/properties/:listingId" element={<ListingDetails />} />
               <Route path="/properties/category/:category" element={<CategoryPage />} />

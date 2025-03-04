@@ -74,6 +74,7 @@ const bookingRoutes = require("./routes/booking.js");
 const userRoutes = require("./routes/user.js");
 const messageRoutes = require("./routes/message.js");
 const notificationRoutes = require("./routes/notification.js");
+const predictionRoutes = require("./routes/rentprediction.js");
 
 app.use("/auth", authRoutes);
 app.use("/properties", listingRoutes);
@@ -81,3 +82,4 @@ app.use("/bookings", bookingRoutes);
 app.use("/users", userRoutes);
 app.use("/messages", messageRoutes);
 app.use("/notification", notificationRoutes);
+app.use("/predict", predictionRoutes);
