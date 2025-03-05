@@ -1,117 +1,95 @@
-const mongoose=require("mongoose")
+const mongoose = require("mongoose");
 
-const ListingSchema=new mongoose.Schema(
-    {
-        creator:
-        {
-            type:mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        category:
-        {
-            type:String,
-            required:true,
-        },
-        type:
-        {
-            type:String,
-            required:true,
-        },
-        streetAddress:
-        {
-            type:String,
-            required:true,
-        },
-        aptSuit:
-        {
-            type:String,
-            required:true,
-        },
-        thana:
-        {
-            type:String,
-            required:true,
-        },
-        postcode:
-        {
-            type:String,
-            required:true,
-        },
-
-        country:
-        {
-            type:String,
-            required:true,
-        },
-        guestCount:
-        {
-            type:Number,
-            required:true,
-        },
-        bathroomCount:
-        {
-            type:Number,
-            required:true,
-        },
-        bedroomCount:
-        {
-            type:Number,
-            required:true,
-        },
-        bedCount:
-        {
-            type:Number,
-            required:true,
-        },
-
-        amenities:
-        {
-           type:Array,
-           default:[]
-        },
-        listingPhotoPaths:
-
-    [{type:String}],
-
-
-    title:
-    {
-        type:String,
-        required:true,
+const ListingSchema = new mongoose.Schema({
+    creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    description:
-    {
-        type:String,
-        required:true,
+    category: {
+        type: String,
+        required: true,
     },
-    highlight:
-    {
-        type:String,
-        required:true,
+    type: {
+        type: String,
+        required: true,
     },
-    highlightdescription:
-    {
-        type:String,
-        required:true,
+    streetAddress: {
+        type: String,
+        required: true,
     },
-    price:
-    {
-        type:Number,
-        required:true
+    aptSuit: {
+        type: String,
+        default: ''
     },
-
+    thana: {
+        type: String,
+        required: true,
+    },
+    postcode: {
+        type: String,
+        required: true,
+    },
+    country: {
+        type: String,
+        required: true,
+    },
+    guestCount: {
+        type: Number,
+        required: true,
+    },
+    bathroomCount: {
+        type: Number,
+        required: true,
+    },
+    bedroomCount: {
+        type: Number,
+        required: true,
+    },
+    bedCount: {
+        type: Number,
+        required: true,
+    },
+    amenities: {
+        type: [String],
+        default: []
+    },
+    listingPhotoPaths: {
+        type: [String],
+        default: []
+    },
+    title: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    highlight: {
+        type: String,
+        required: true,
+    },
+    highlightdescription: {
+        type: String,
+        required: true,
+    },
+    price: {
+        type: Number,
+        required: true
+    },
     latitude: {
         type: Number,
-        required: true,  // Ensure this is required if location data is necessary
-      },
-      longitude: {
-        type: Number,
-        required: true,  // Ensure this is required if location data is necessary
-      },
-
+        required: true,
     },
-    {timestamps:true}
-)
+    longitude: {
+        type: Number,
+        required: true,
+    },
+    isBooked: {
+        type: Boolean,
+        default: false
+    }
+}, { timestamps: true });
 
-const Listing=mongoose.model("Listing",ListingSchema)
-module.exports=Listing
+module.exports = mongoose.model("Listing", ListingSchema);

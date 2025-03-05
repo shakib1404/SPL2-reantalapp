@@ -150,7 +150,7 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link to={`/${user._id}/trips`}>Previous Houses</Link>
+                <Link to={`/${user._id}/trips`}>Previous Visit Requests</Link>
                 <Link to={`/${user._id}/wishList`}>Wish List</Link>
                 <Link to={`/${user._id}/properties`}>Property List</Link>
                 <Link to={`/${user._id}/reservations`}>Reservation List</Link>
