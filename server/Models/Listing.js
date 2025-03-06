@@ -86,6 +86,11 @@ const ListingSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    wishlisted: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'User',
+        default: []
+    },
     isBooked: {
         type: Boolean,
         default: false

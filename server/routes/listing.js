@@ -15,6 +15,11 @@ class ListingController {
         this.router.get("/:listingId", this.getListingById.bind(this));
         this.router.delete("/:listingId", this.deleteListing.bind(this));
         this.router.put("/update/:listingId", this.uploadPhotos().array("listingPhotos"), this.updateListing.bind(this));
+
+         // New routes for wishlisted functionality
+         this.router.patch("/:listingId/wishlisted", this.addToWishlisted.bind(this));
+         this.router.delete("/:listingId/wishlisted", this.removeFromWishlisted.bind(this));
+         this.router.get("/:listingId/wishlisted", this.getWishlistedUsers.bind(this));
        
     }
 
@@ -237,6 +242,73 @@ class ListingController {
             res.status(200).json(updatedListing);
         } catch (err) {
             res.status(500).json({ message: "Failed to update listing", error: err.message });
+        }
+    }
+
+    async addToWishlisted(req, res) {
+        try {
+            const { listingId } = req.params;
+            const { userId } = req.body;
+
+            if (!userId) {
+                return res.status(400).json({ message: "User ID is required" });
+            }
+
+            const listing = await Listing.findById(listingId);
+            if (!listing) {
+                return res.status(404).json({ message: "Listing not found" });
+            }
+
+            // Check if user is already in the wishlisted array
+            if (!listing.wishlisted.includes(userId)) {
+                listing.wishlisted.push(userId);
+                await listing.save();
+            }
+
+            res.status(200).json({ message: "User added to wishlisted array", listing });
+        } catch (err) {
+            res.status(500).json({ message: "Failed to add user to wishlisted array", error: err.message });
+        }
+    }
+
+    // New method to remove a user from the wishlisted array of a listing
+    async removeFromWishlisted(req, res) {
+        try {
+            const { listingId } = req.params;
+            const { userId } = req.body;
+
+            if (!userId) {
+                return res.status(400).json({ message: "User ID is required" });
+            }
+
+            const listing = await Listing.findById(listingId);
+            if (!listing) {
+                return res.status(404).json({ message: "Listing not found" });
+            }
+
+            // Remove user from wishlisted array
+            listing.wishlisted = listing.wishlisted.filter(id => id.toString() !== userId.toString());
+            await listing.save();
+
+            res.status(200).json({ message: "User removed from wishlisted array", listing });
+        } catch (err) {
+            res.status(500).json({ message: "Failed to remove user from wishlisted array", error: err.message });
+        }
+    }
+
+    // New method to get all users who have wishlisted a specific listing
+    async getWishlistedUsers(req, res) {
+        try {
+            const { listingId } = req.params;
+            
+            const listing = await Listing.findById(listingId).populate("wishlisted", "firstname lastname email");
+            if (!listing) {
+                return res.status(404).json({ message: "Listing not found" });
+            }
+
+            res.status(200).json({ wishlisted: listing.wishlisted });
+        } catch (err) {
+            res.status(500).json({ message: "Failed to get wishlisted users", error: err.message });
         }
     }
 

@@ -153,7 +153,7 @@ const Navbar = () => {
                 <Link to={`/${user._id}/trips`}>Previous Visit Requests</Link>
                 <Link to={`/${user._id}/wishList`}>Wish List</Link>
                 <Link to={`/${user._id}/properties`}>Property List</Link>
-                <Link to={`/${user._id}/reservations`}>Reservation List</Link>
+                <Link to={`/${user._id}/reservations`}>Your Properties visited</Link>
                 <Link to={`/rent-predictor`}>Predict The Rent</Link>
                 <Link to="/create-listing">Become A Host</Link>
                 <Link

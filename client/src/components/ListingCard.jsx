@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setWishList } from "../redux/state";
 
-
 const ListingCard = ({
   listingId,
   creator,
@@ -23,12 +22,11 @@ const ListingCard = ({
   category,
   type,
   price,
-   
+  isBooked,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLandlord, setIsLandlord] = useState(false);
   const [deleted, setDeleted] = useState(false);
-
 
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -68,6 +66,16 @@ const ListingCard = ({
         if (response.ok) {
           dispatch(setWishList(data.wishList));
 
+          // Update the listing's wishlisted array
+          await fetch(`http://localhost:3001/properties/${listingId}/wishlisted`, {
+            method: isLiked ? "DELETE" : "PATCH", 
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId: user._id }),
+          });
+
+          // Send notification to property owner
           await fetch(`http://localhost:3001/notification`, {
             method: "POST",
             headers: {
@@ -138,8 +146,6 @@ const ListingCard = ({
 
   useEffect(() => {
     checkLandlordStatus();
-    
-
   }, [user]);
 
   if (deleted) {
@@ -187,16 +193,19 @@ const ListingCard = ({
         </div>
       </div>
 
-     
       <h3>
         {thana}, {postcode}, {country}
       </h3>
       <p>{category}</p>
       <p>{type}</p>
       <p>
-        <span>
-        TK&nbsp;{price}</span>
+        <span>TK&nbsp;{price}</span>
       </p>
+      {isBooked && (
+        <div className="booked-badge">
+          Currently Booked
+        </div>
+      )}
 
       <div className="action-buttons">
         {isLandlord && (

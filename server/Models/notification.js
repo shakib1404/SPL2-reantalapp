@@ -26,7 +26,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['BOOKING_REQUEST', 'BOOKING_APPROVED', 'BOOKING_DECLINED', 'WISHLIST', 'GENERAL'],
+    enum: ['BOOKING_REQUEST', 'BOOKING_APPROVED', 'BOOKING_DECLINED', 'WISHLIST', 'GENERAL','PROPERTY_AVAILABLE'],
     required: true
   },
   timestamp: {

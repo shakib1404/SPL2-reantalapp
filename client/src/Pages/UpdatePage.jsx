@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/CreateListing.scss";
 import Navbar from "../components/Navbar";
 import { categories, types, facilities } from "../data";
@@ -8,16 +8,14 @@ import { IoIosImages } from "react-icons/io";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { BiTrash } from "react-icons/bi";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect } from "react";
-import { useParams } from "react-router-dom";
-
 import Footer from "../components/Footer";
 
 const UpdatePage = () => {
+   const currentUser = useSelector((state) => state.user);
   const [category, setCategory] = useState("");
   const [type, setType] = useState("");
   const [isBooked, setIsBooked] = useState(false); 
@@ -28,8 +26,8 @@ const UpdatePage = () => {
     thana: "",
     postcode: "",
     country: "",
-    latitude: null, // Add latitude
-    longitude: null, // Add longitude
+    latitude: null,
+    longitude: null,
   });
 
   const [photos, setPhotos] = useState([]);
@@ -41,7 +39,6 @@ const UpdatePage = () => {
       [name]: value,
     });
   };
-  //console.log(formLocation);
 
   const [guestCount, setGuestcount] = useState(1);
   const [bathroomCount, setBathroomcount] = useState(1);
@@ -49,6 +46,9 @@ const UpdatePage = () => {
   const [bedroomCount, setBedRoomcount] = useState(1);
   const [amenities, setAmenities] = useState([]);
   
+  const { listingId } = useParams();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.user.currentUser);
 
   const handleSelectAmenities = (facility) => {
     if (amenities.includes(facility)) {
@@ -74,6 +74,7 @@ const UpdatePage = () => {
 
     setPhotos(items);
   };
+
   const handleRemovePhoto = (indexToRemove) => {
     setPhotos((prevPhotos) =>
       prevPhotos.filter((_, index) => index !== indexToRemove)
@@ -81,10 +82,10 @@ const UpdatePage = () => {
   };
 
   const markerIcon = new L.Icon({
-    iconUrl: "../../assets/marker.png", // Provide a path to your marker icon image
-    iconSize: [32, 32], // Set the size of the icon
-    iconAnchor: [16, 32], // Anchor the icon to the bottom center
-    popupAnchor: [0, -32], // Set the popup anchor position
+    iconUrl: "../../assets/marker.png",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
   });
 
   const LocationPicker = ({ setFormLocation }) => {
@@ -108,6 +109,7 @@ const UpdatePage = () => {
     highlightdescription: "",
     price: 0,
   });
+
   const handleChangeDescription = (e) => {
     const { name, value } = e.target;
     setFormDescription({
@@ -115,10 +117,6 @@ const UpdatePage = () => {
       [name]: value,
     });
   };
-
-  const { listingId } = useParams();
-  const navigate = useNavigate();
-  console.log(listingId);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -130,8 +128,7 @@ const UpdatePage = () => {
           throw new Error("Failed to fetch listing data");
         }
         const data = await response.json();
-        console.log(data.category);
-        // Populate state with fetched data
+        
         setCategory(data.category);
         setType(data.type);
         setFormLocation({
@@ -156,6 +153,7 @@ const UpdatePage = () => {
         setBedcount(data.bedCount || 1);
         setBedRoomcount(data.bedroomCount || 1);
         setAmenities(data.amenities[0].split(",") || []);
+        console.log(data.isBooked)
         setIsBooked(data.isBooked || false);
       } catch (error) {
         console.error("Error fetching listing data:", error);
@@ -165,13 +163,18 @@ const UpdatePage = () => {
     fetchListing();
   }, [listingId]);
 
-  console.log(bedroomCount);
-  
-  
-
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
+      // Fetch the current listing to check if it's currently booked
+      const currentListingResponse = await fetch(
+        `http://localhost:3001/properties/${listingId}`
+      );
+      const currentListing = await currentListingResponse.json();
+      const wasbooked=currentListing.isBooked;
+      
+      
+      // Create the form data
       const listingForm = new FormData();
       listingForm.append("category", category);
       listingForm.append("type", type);
@@ -201,7 +204,7 @@ const UpdatePage = () => {
         listingForm.append("listingPhotos", photo);
       });
 
-     
+      // Update the listing
       const response = await fetch(
         `http://localhost:3001/properties/update/${listingId}`,
         {
@@ -213,6 +216,34 @@ const UpdatePage = () => {
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Update Listing failed");
+      }
+      console.log(currentListing.wishlisted)
+
+     
+      console.log(isBooked)
+      console.log( !isBooked && currentListing.wishlisted && currentListing.wishlisted.length > 0)
+      console.log(formDescription.title)
+      console.log(wasbooked)
+      console.log(currentUser._id)
+      // If the property was previously booked and is now available, notify all users who wishlisted it
+      if ( wasbooked &&!isBooked && currentListing.wishlisted && currentListing.wishlisted.length > 0) {
+        // Send notification to all users who wishlisted this property
+        for (const userId of currentListing.wishlisted) {
+          console.log(userId)
+          await fetch(`http://localhost:3001/notification`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              senderId: currentUser._id, // The current user (property owner)
+              listingId,
+              type: 'PROPERTY_AVAILABLE',
+              message: `A property you wishlisted (${formDescription.title}) is now available!`,
+            }),
+          });
+        }
       }
 
       navigate(`/properties/${listingId}`);
@@ -271,7 +302,6 @@ const UpdatePage = () => {
             <h3>What type of place will a person have?</h3>
             <div className="type-list">
               {types?.map((item, index) => (
-                // Use parentheses for an implicit return
                 <div
                   className={`type ${type === item.name ? "selected" : ""}`}
                   key={index}
@@ -426,6 +456,7 @@ const UpdatePage = () => {
 
               <div className="basic">Beds</div>
               <div className="basic_count">
+                
                 <RemoveCircleOutline
                   onClick={() => {
                     bedCount > 1 && setBedcount(bedCount - 1);
