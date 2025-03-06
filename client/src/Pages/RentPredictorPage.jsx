@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/RentPredictorPage.scss';
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function RentPredictorPage() {
   // Form state
@@ -237,6 +239,8 @@ function RentPredictorPage() {
   };
 
   return (
+    <>
+      <Navbar />
     <div className="App">
       <header className="App-header">
         <h1>Dhaka House Rent Predictor</h1>
@@ -335,6 +339,8 @@ function RentPredictorPage() {
         </div>
       </main>
     </div>
+    <Footer/>
+    </>
   );
 }
 

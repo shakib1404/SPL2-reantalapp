@@ -194,7 +194,8 @@ const ListingCard = ({
       <p>{category}</p>
       <p>{type}</p>
       <p>
-        <span>${price}</span>
+        <span>
+        TK&nbsp;{price}</span>
       </p>
 
       <div className="action-buttons">
