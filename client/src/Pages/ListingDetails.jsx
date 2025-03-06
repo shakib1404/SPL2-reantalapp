@@ -259,7 +259,7 @@ const ListingDetails = () => {
 
           <hr />
           <div>
-            <h2>Choose your stay date:</h2>
+            <h2>Choose your visiting date:</h2>
             <div className="date-range-calendar">
               <DateRange
                 ranges={[
@@ -275,7 +275,7 @@ const ListingDetails = () => {
                 showDateDisplay={false} // Hides range details
               />
               <h3>Selected Date: {selectedDate.toDateString()}</h3>
-              <h3>Price: ${listing.price}</h3>
+              <h3>Price: Tk&nbsp;{listing.price}</h3>
               <button
                 className="button"
                 onClick={handleSubmit}

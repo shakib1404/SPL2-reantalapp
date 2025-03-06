@@ -607,7 +607,7 @@ const UpdatePage = () => {
             </div>
           </div>
               <p>Now,set your PRICE</p>
-              <span>$</span>
+              <span>Tk</span>
               <input
                 type="Number"
                 placeholder="1000"
