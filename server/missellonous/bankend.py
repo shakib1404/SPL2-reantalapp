@@ -7,8 +7,8 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Load the trained model and feature columns
-model = joblib.load("rental_price_model.pkl")
-X_columns = joblib.load("X_columns.pkl")
+model = joblib.load("../RentPrediction/Model/dhaka_rent_model.pkl")
+X_columns = joblib.load("../RentPrediction/Model/X_columns.pkl")
 
 def predict_price(location, area, bed, bath):
     # Create an input array with zeros, matching the number of features in the model
@@ -21,7 +21,8 @@ def predict_price(location, area, bed, bath):
 
     # If the location is part of the feature columns, encode it
     if location in X_columns:
-        x[np.where(X_columns == location)[0][0]] = 1
+        location_index = X_columns.index(location)
+        x[location_index] = 1
 
     # Predict the price using the trained model
     predicted_price = model.predict([x])[0]
@@ -51,7 +52,7 @@ def predict():
 
     # Get the predicted rent
     predicted_rent = predict_price(location, area, bed, bath)
-
+    predicted_rent = float(predicted_rent)
     # Return the predicted rent as a JSON response
     return jsonify({'prediction': predicted_rent})
 
