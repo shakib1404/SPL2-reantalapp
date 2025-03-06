@@ -93,6 +93,8 @@ const CategoryPage = () => {
           <option value="2">2 Bedrooms</option>
           <option value="3">3 Bedrooms</option>
           <option value="4">4 Bedrooms</option>
+          <option value="4">5 Bedrooms</option>
+          <option value="4">6 Bedrooms</option>
         </select>
 
         <select 
@@ -103,6 +105,9 @@ const CategoryPage = () => {
           <option value="1">1 Bathroom</option>
           <option value="2">2 Bathrooms</option>
           <option value="3">3 Bathrooms</option>
+          <option value="3">4 Bathrooms</option>
+          <option value="3">5 Bathrooms</option>
+          <option value="3">6 Bathrooms</option>
         </select>
 
         <input

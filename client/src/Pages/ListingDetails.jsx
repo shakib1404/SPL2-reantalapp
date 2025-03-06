@@ -10,6 +10,11 @@ import Navbar from "../components/Navbar";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
+
 
 // Importing Leaflet and React-Leaflet components
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -23,6 +28,7 @@ const ListingDetails = () => {
   const [isLandlord, setIsLandlord] = useState(false); // Track landlord status
   const [selectedDate, setSelectedDate] = useState(new Date()); // Booking date
   const [customerDetails, setCustomerDetails] = useState(null);
+
 
   const customerId = useSelector((state) => state?.user?._id); // Get user ID
   const userRole = useSelector((state) => state?.user?.role); // Assuming role is stored in Redux
@@ -56,7 +62,13 @@ const ListingDetails = () => {
         }
       );
       const data = await response.json();
+      
       setListing(data);
+      
+     
+      console.log(data.isBooked)
+      
+      
       setLoading(false);
     } catch (err) {
       console.log("Fetch Listing Details Failed", err.message);
@@ -65,11 +77,13 @@ const ListingDetails = () => {
 
   const currentUserRole = async () => {
     if (!customerId || !listingId) return; // Ensure both user and listing are defined
-  
+
     try {
-      const response = await fetch(`http://localhost:3001/properties/${listingId}`);
+      const response = await fetch(
+        `http://localhost:3001/properties/${listingId}`
+      );
       const listingData = await response.json();
-  
+
       // Check if the current user is the creator (owner) of this property
       const isOwner = listingData.creator._id === customerId;
       setIsLandlord(isOwner); // Update state accordingly
@@ -85,6 +99,10 @@ const ListingDetails = () => {
   // Handle booking form submission
   const handleSubmit = async () => {
     try {
+      if (listing.isBooked) {
+        alert("This house is already rented. Booking is not possible.");
+        return; 
+      }
       const bookingForm = {
         customerId,
         listingId,
@@ -98,7 +116,6 @@ const ListingDetails = () => {
       console.log(selectedDate.toDateString());
       console.log(listing.price);
 
-
       const response = await fetch("http://localhost:3001/bookings/create", {
         method: "POST",
         headers: {
@@ -111,7 +128,6 @@ const ListingDetails = () => {
         navigate(`/${customerId}/trips`);
       }
 
-      
       await fetch(`http://localhost:3001/notification`, {
         method: "POST",
         headers: {
@@ -121,8 +137,10 @@ const ListingDetails = () => {
           userId: listing.creator._id,
           senderId: customerId,
           listingId,
-          type: 'BOOKING_REQUEST',
-          message: `${customerDetails.firstname} wants to visit you on ${selectedDate.toDateString()}`
+          type: "BOOKING_REQUEST",
+          message: `${
+            customerDetails.firstname
+          } wants to visit you on ${selectedDate.toDateString()}`,
         }),
       });
     } catch (err) {
@@ -151,7 +169,10 @@ const ListingDetails = () => {
       <Navbar />
       <div className="listing-details">
         <div className="title">
-          <h1>{listing.title}</h1>
+          <h1>
+            {listing.title} {listing.isBooked?"(Now in Rent)":"(Available)"}
+          </h1>
+
           <div></div>
         </div>
 
@@ -227,12 +248,9 @@ const ListingDetails = () => {
           <h2>What this place offers?</h2>
           <div className="amenities">
             {listing.amenities[0].split(",").map((item, index) => (
-              <div className="facility" key={index}>
+              <div className="facility" key={item}>
                 <div className="facility_icon">
-                  {
-                    facilities.find((facility) => facility.name === item)
-                      ?.icon
-                  }
+                  {facilities.find((facility) => facility.name === item)?.icon}
                 </div>
                 <p>{item}</p>
               </div>
@@ -258,8 +276,13 @@ const ListingDetails = () => {
               />
               <h3>Selected Date: {selectedDate.toDateString()}</h3>
               <h3>Price: ${listing.price}</h3>
-              <button className="button" onClick={handleSubmit}>
-                Request Booking
+              <button
+                className="button"
+                onClick={handleSubmit}
+                disabled={isLandlord}
+                
+              >
+                Book Visiting Date
               </button>
             </div>
           </div>
@@ -274,7 +297,7 @@ const ListingDetails = () => {
           </div>
         )}
 
-        {isLandlord&& (
+        {isLandlord && (
           <div className="chat-button-container">
             <button className="button" onClick={handleChatClick}>
               View Messages

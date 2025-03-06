@@ -15,6 +15,7 @@ class ListingController {
         this.router.get("/:listingId", this.getListingById.bind(this));
         this.router.delete("/:listingId", this.deleteListing.bind(this));
         this.router.put("/update/:listingId", this.uploadPhotos().array("listingPhotos"), this.updateListing.bind(this));
+       
     }
 
     uploadPhotos() {
@@ -194,6 +195,7 @@ class ListingController {
                 price,
                 latitude,
                 longitude,
+                isBooked,
             } = req.body;
 
             const listingPhotos = req.files;
@@ -224,6 +226,7 @@ class ListingController {
                     price,
                     latitude,
                     longitude,
+                    isBooked,
                     listingPhotoPaths,
                 },
                 { new: true }
@@ -236,6 +239,8 @@ class ListingController {
             res.status(500).json({ message: "Failed to update listing", error: err.message });
         }
     }
+
+   
 }
 
 const listingController = new ListingController();

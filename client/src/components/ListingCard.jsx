@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setWishList } from "../redux/state";
 
+
 const ListingCard = ({
   listingId,
   creator,
@@ -22,13 +23,12 @@ const ListingCard = ({
   category,
   type,
   price,
-  bookingDate,
-  totalPrice,
-  booking,
+   
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLandlord, setIsLandlord] = useState(false);
-  const [deleted, setDeleted] = useState(false); // State to hide the card after deletion
+  const [deleted, setDeleted] = useState(false);
+
 
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ const ListingCard = ({
   const wishList = user?.wishList || [];
   const isLiked = wishList?.find((item) => item?._id === listingId);
 
+  // Image slider navigation methods
   const goToPrevSlide = () => {
     setCurrentIndex(
       (prevIndex) =>
@@ -48,6 +49,7 @@ const ListingCard = ({
     setCurrentIndex((prevIndex) => (prevIndex + 1) % listingPhotoPaths.length);
   };
 
+  // Wishlist management
   const patchWishList = async () => {
     if (user?._id !== creator._id) {
       try {
@@ -75,7 +77,7 @@ const ListingCard = ({
               userId: creator._id,
               senderId: user._id,
               listingId,
-              type:'WISHLIST',
+              type: 'WISHLIST',
               message: isLiked
                 ? `${user.firstname} removed your property from their wishlist.`
                 : `${user.firstname} added your property to their wishlist.`,
@@ -90,6 +92,7 @@ const ListingCard = ({
     }
   };
 
+  // Listing deletion
   const deleteListing = async (e) => {
     e.stopPropagation();
     try {
@@ -102,7 +105,7 @@ const ListingCard = ({
 
       if (response.ok) {
         console.log("Listing deleted successfully");
-        setDeleted(true); // Mark as deleted locally
+        setDeleted(true);
       } else {
         console.error("Failed to delete listing");
       }
@@ -111,11 +114,13 @@ const ListingCard = ({
     }
   };
 
+  // Edit listing navigation
   const editListing = (e) => {
     e.stopPropagation();
     navigate(`/properties/edit/${listingId}`);
   };
 
+  // Check if user is the landlord of this property
   const checkLandlordStatus = async () => {
     if (!user) return;
     try {
@@ -132,11 +137,13 @@ const ListingCard = ({
   };
 
   useEffect(() => {
-    checkLandlordStatus(); // Check landlord status on component mount
+    checkLandlordStatus();
+    
+
   }, [user]);
 
   if (deleted) {
-    return null; // Hide the card if it has been deleted
+    return null;
   }
 
   return (
@@ -180,28 +187,15 @@ const ListingCard = ({
         </div>
       </div>
 
+     
       <h3>
         {thana}, {postcode}, {country}
       </h3>
       <p>{category}</p>
-
-      {!booking ? (
-        <>
-          <p>{type}</p>
-          <p>
-            <span>${price}</span> per night
-          </p>
-        </>
-      ) : (
-        <>
-          <p>
-           {bookingDate}
-          </p>
-          <p>
-            <span>${totalPrice}</span> total
-          </p>
-        </>
-      )}
+      <p>{type}</p>
+      <p>
+        <span>${price}</span>
+      </p>
 
       <div className="action-buttons">
         {isLandlord && (

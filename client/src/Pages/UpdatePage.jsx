@@ -20,6 +20,7 @@ import Footer from "../components/Footer";
 const UpdatePage = () => {
   const [category, setCategory] = useState("");
   const [type, setType] = useState("");
+  const [isBooked, setIsBooked] = useState(false); 
 
   const [formLocation, setFormLocation] = useState({
     streetAddress: "",
@@ -155,6 +156,7 @@ const UpdatePage = () => {
         setBedcount(data.bedCount || 1);
         setBedRoomcount(data.bedroomCount || 1);
         setAmenities(data.amenities[0].split(",") || []);
+        setIsBooked(data.isBooked || false);
       } catch (error) {
         console.error("Error fetching listing data:", error);
       }
@@ -193,6 +195,7 @@ const UpdatePage = () => {
         formDescription.highlightdescription
       );
       listingForm.append("price", formDescription.price);
+      listingForm.append("isBooked", isBooked);
 
       photos.forEach((photo) => {
         listingForm.append("listingPhotos", photo);
@@ -589,6 +592,20 @@ const UpdatePage = () => {
                 onChange={handleChangeDescription}
                 required
               />
+
+<div className="booking-status">
+            <h3>Booking Status</h3>
+            <div className="toggle-container">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={isBooked}
+                  onChange={() => setIsBooked(!isBooked)}
+                />
+                Mark as Booked
+              </label>
+            </div>
+          </div>
               <p>Now,set your PRICE</p>
               <span>$</span>
               <input

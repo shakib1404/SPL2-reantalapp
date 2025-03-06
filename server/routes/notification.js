@@ -1,5 +1,8 @@
 const express = require("express");
+const nodemailer = require("nodemailer");
 const Notification = require("../Models/notification");
+const User = require("../Models/user"); // Assuming you have a User model to fetch the email
+// If you don't have a User model, replace this with your own method to fetch the user by userId
 
 class NotificationController {
     constructor() {
@@ -44,6 +47,10 @@ class NotificationController {
             if (io) {
               io.to(`notification-${userId}`).emit("newNotification", savedNotification);
             }
+
+            // Send email notification
+            await this.sendEmailNotification(userId, message);
+
             res.status(201).json(savedNotification);
         } catch (err) {
             res.status(500).json({ error: 'Failed to create notification' });
@@ -94,6 +101,42 @@ class NotificationController {
             res.status(200).json({ message: 'All notifications deleted' });
         } catch (err) {
             res.status(500).json({ error: 'Failed to delete notifications' });
+        }
+    }
+
+    // Function to send email notification
+    async sendEmailNotification(userId, message) {
+        try {
+            // Fetch user email (you should have a User model or a way to fetch the email based on userId)
+            const user = await User.findById(userId); // Replace with actual User model and query
+
+            if (!user) {
+                console.error("User not found");
+                return;
+            }
+
+            // Set up your email transporter using Nodemailer
+            const transporter = nodemailer.createTransport({
+                service: 'gmail', // Use Gmail or any other email provider
+                auth: {
+                    user: process.env.GMAIL_USER, // Replace with your email
+                    pass: process.env.GMAIL_PASS, // Replace with your email password or use OAuth
+                },
+            });
+
+            // Email content
+            const mailOptions = {
+                from: process.env.GMAIL_USER,
+                to: user.email, // User's email
+                subject: 'New Notification',
+                text: message, // Message of the notification
+            };
+
+            // Send the email
+            await transporter.sendMail(mailOptions);
+            console.log('Email sent successfully');
+        } catch (err) {
+            console.error('Error sending email:', err);
         }
     }
 }
