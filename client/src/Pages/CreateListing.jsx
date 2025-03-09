@@ -249,10 +249,10 @@ const CreateListing = () => {
             </div>
             <div className="half">
               <div className="location">
-                <p>Apartment,Suit etc (if applicable)</p>
+                <p>Apartment,Duplex etc (if applicable)</p>
                 <input
                   type="text"
-                  placeholder="Apt,Suit etc (if applicable)"
+                  placeholder="Apt,Duplex etc (if applicable)"
                   name="aptSuit"
                   value={formLocation.aptSuit}
                   onChange={handleChangeLocation}

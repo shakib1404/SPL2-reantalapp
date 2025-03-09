@@ -111,10 +111,10 @@ class ListingController {
         try {
           const { searchTerm, bedroomCount, bathroomCount, minPrice, maxPrice } = req.query;
           
-          // Build filter object
+         
           let filter = {};
           
-          // Add regex search for category and title if searchTerm exists
+          
           if (searchTerm) {
             const searchRegex = new RegExp(searchTerm, 'i');
             filter.$or = [
@@ -136,7 +136,7 @@ class ListingController {
           
           console.log("Applied Filters:", filter);
           
-          // Get listings that match ALL filters including regex search
+          
           const listings = await Listing.find(filter).populate("creator");
           
           res.status(200).json(listings);
@@ -259,7 +259,7 @@ class ListingController {
                 return res.status(404).json({ message: "Listing not found" });
             }
 
-            // Check if user is already in the wishlisted array
+            
             if (!listing.wishlisted.includes(userId)) {
                 listing.wishlisted.push(userId);
                 await listing.save();
@@ -271,7 +271,7 @@ class ListingController {
         }
     }
 
-    // New method to remove a user from the wishlisted array of a listing
+    
     async removeFromWishlisted(req, res) {
         try {
             const { listingId } = req.params;
@@ -286,7 +286,7 @@ class ListingController {
                 return res.status(404).json({ message: "Listing not found" });
             }
 
-            // Remove user from wishlisted array
+           
             listing.wishlisted = listing.wishlisted.filter(id => id.toString() !== userId.toString());
             await listing.save();
 
@@ -296,7 +296,7 @@ class ListingController {
         }
     }
 
-    // New method to get all users who have wishlisted a specific listing
+    
     async getWishlistedUsers(req, res) {
         try {
             const { listingId } = req.params;

@@ -39,21 +39,21 @@ const SearchPage = () => {
 
       const data = await response.json();
       
-      // Client-side filtering (to make sure we are applying all filters)
+      
       const filteredListings = data.filter(listing => {
-        // Match bedroom count filter
+        
         if (bedroomCount && listing.bedroomCount !== parseInt(bedroomCount)) {
           return false;
         }
-        // Match bathroom count filter
+        
         if (bathroomCount && listing.bathroomCount !== parseInt(bathroomCount)) {
           return false;
         }
-        // Match min price filter
+       
         if (minPrice && listing.price < parseInt(minPrice)) {
           return false;
         }
-        // Match max price filter
+        
         if (maxPrice && listing.price > parseInt(maxPrice)) {
           return false;
         }
@@ -88,8 +88,8 @@ const SearchPage = () => {
           <option value="2">2 Bedrooms</option>
           <option value="3">3 Bedrooms</option>
           <option value="4">4 Bedrooms</option>
-          <option value="4">5 Bedrooms</option>
-          <option value="4">6 Bedrooms</option>
+          <option value="5">5 Bedrooms</option>
+          <option value="6">6 Bedrooms</option>
         </select>
 
         <select 
@@ -100,9 +100,9 @@ const SearchPage = () => {
           <option value="1">1 Bathroom</option>
           <option value="2">2 Bathrooms</option>
           <option value="3">3 Bathrooms</option>
-          <option value="3">4 Bathrooms</option>
-          <option value="3">5 Bathrooms</option>
-          <option value="3">6 Bathrooms</option>
+          <option value="4">4 Bathrooms</option>
+          <option value="5">5 Bathrooms</option>
+          <option value="6">6 Bathrooms</option>
         </select>
 
         <input

@@ -50,37 +50,37 @@ export const categories = [
     icon: <BiWorld />,
   },
   {
-    img: "assets/beach_cat.jpg",
+    img: "assets/mohammadpur.jpg",
     label: "Mohammadpur",
     icon: <MdOutlineVilla />, // You can choose a more fitting icon
     description: "A vibrant area known for its community parks and markets.",
   },
   {
-    img: "assets/windmill_cat.webp",
+    img: "assets/gulshan.jpg",
     label: "Gulshan",
     icon: <IoDiamond />, // Luxury and upscale living
     description: "An upscale neighborhood with luxury shopping and dining.",
   },
   {
-    img: "assets/modern_cat.webp",
+    img: "assets/mirpur.jpg",
     label: "Mirpur",
     icon: <TbMountain />, // Symbolizing hills or parks
     description: "A bustling area with a mix of residential and commercial spaces.",
   },
   {
-    img: "assets/countryside_cat.webp",
+    img: "assets/Dhanmondi.png",
     label: "Dhanmondi",
     icon: <GiIsland />, // Suggesting a calm atmosphere
     description: "Known for its lakes and cultural spots, perfect for relaxation.",
   },
   {
-    img: "assets/pool_cat.jpg",
+    img: "assets/basundhara.webp",
     label: "Bashundhara",
     icon: <TbPool />, // For residential areas with pools
     description: "A modern residential area with beautiful landscapes.",
   },
   {
-    img: "assets/island_cat.webp",
+    img: "assets/Banani.jpg",
     label: "Banani",
     icon: <GiWindmill />, // For its modern architecture
     description: "A posh area featuring parks and premium living spaces.",

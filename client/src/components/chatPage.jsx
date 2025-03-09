@@ -120,25 +120,25 @@ const ChatPage = () => {
     // Join socket room
     socket.emit("joinRoom", listingId);
     
-    // Listen for incoming messages
+    
     socket.on("receiveMessage", (newMessage) => {
       if (
         ((newMessage.senderId === currentUser._id || newMessage.senderId === currentUser._id.toString()) || 
          (newMessage.receiverId === currentUser._id || newMessage.receiverId === currentUser._id.toString())) &&
         newMessage.listingId === listingId
       ) {
-        // Add new message to the state without refreshing
+       
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       }
     });
     
-    // Cleanup socket listeners on component unmount
+    
     return () => {
       socket.off("receiveMessage");
     };
   }, [currentUser, listingId, otherUserInfo, isLandlord, specificTenantId]);
 
-  // Scroll to bottom whenever messages change
+  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -214,7 +214,7 @@ const ChatPage = () => {
 
   // Send message with text and/or file
   const sendMessage = async () => {
-    // Check if both message is empty and no file selected
+   
     if (!newMessage.trim() && !selectedFile) {
       alert("Message cannot be empty or select a file to send!");
       return;
@@ -242,7 +242,7 @@ const ChatPage = () => {
         fileName: selectedFile ? selectedFile.name : null,
       };
 
-      // Save message to database first
+     
       const response = await fetch("http://localhost:3001/messages/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -256,10 +256,10 @@ const ChatPage = () => {
       // Get the saved message with proper ID and timestamps
       const savedMessage = await response.json();
       
-      // Emit message via socket with the saved message data
+      
       socket.emit("sendMessage", savedMessage);
       
-      // Clear input field and selected file
+      
       setNewMessage("");
       clearSelectedFile();
     } catch (error) {

@@ -86,7 +86,7 @@ const LandlordInboxPage = () => {
                         <span className="date">{formatDate(conv.createdAt)}</span>
                       </div>
                       <p className="tenant-name">From: {conv.senderName || "Unknown"}</p>
-                      {/* Can add preview message here if available */}
+                      
                     </div>
                   </div>
                 </div>

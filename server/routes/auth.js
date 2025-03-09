@@ -109,7 +109,7 @@ class AuthController {
                 return res.status(404).json({ message: "User not found" });
             }
 
-            // Generate a 6-digit OTP
+           
             const otp = crypto.randomInt(100000, 999999).toString();
 
             // Store OTP and expiration time in-memory
@@ -118,7 +118,7 @@ class AuthController {
                 expires: Date.now() + 10 * 60 * 1000, // 10 minutes from now
             };
 
-            // Send the OTP email
+            
             const mailOptions = {
                 from: process.env.GMAIL_USER,
                 to: email,

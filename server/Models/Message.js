@@ -21,7 +21,7 @@ const MessageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // New fields for file attachments
+    
     fileUrl: {
       type: String,
       default: null,

@@ -15,13 +15,13 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    // Start the server only after MongoDB connection is successful
+    
     const server = app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
    
     // Initialize Socket.IO after server is created
     const io = new Server(server, {
       cors: {
-        origin: "http://localhost:3000", // Allow requests from the frontend
+        origin: "http://localhost:3000", 
         methods: ["GET", "POST"],
       },
     });
@@ -33,28 +33,28 @@ mongoose
     io.on("connection", (socket) => {
       console.log("A user connected:", socket.id);
      
-      // Handle joining chat room based on listingId
+     
       socket.on("joinRoom", (listingId) => {
         socket.join(listingId);
         console.log(`User with ID: ${socket.id} joined room: ${listingId}`);
       });
       
-      // Handle joining notification room for a specific user
+     
       socket.on("joinNotificationRoom", (userId) => {
         socket.join(`notification-${userId}`);
         console.log(`User with ID: ${socket.id} joined notification room for user: ${userId}`);
       });
      
-      // Handle sending message - matches the client implementation
+      
       socket.on("sendMessage", (messageData) => {
-        // Emit the new message to users in the same room (listingId)
+       
         io.to(messageData.listingId).emit("receiveMessage", {
           ...messageData,
           createdAt: new Date().toISOString()
         });
       });
      
-      // Handle disconnection
+      
       socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
       });

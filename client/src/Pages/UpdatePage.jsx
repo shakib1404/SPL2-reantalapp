@@ -166,7 +166,7 @@ const UpdatePage = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      // Fetch the current listing to check if it's currently booked
+      
       const currentListingResponse = await fetch(
         `http://localhost:3001/properties/${listingId}`
       );
@@ -227,7 +227,7 @@ const UpdatePage = () => {
       console.log(currentUser._id)
       // If the property was previously booked and is now available, notify all users who wishlisted it
       if ( wasbooked &&!isBooked && currentListing.wishlisted && currentListing.wishlisted.length > 0) {
-        // Send notification to all users who wishlisted this property
+        
         for (const userId of currentListing.wishlisted) {
           console.log(userId)
           await fetch(`http://localhost:3001/notification`, {

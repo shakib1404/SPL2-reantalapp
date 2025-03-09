@@ -43,7 +43,7 @@ const ReservationList = () => {
       <Navbar />
       <h1 className="title-list">Your Visited Property List</h1>
       <div className="list">
-        {reservationList?.map(({ listingId, hostId, startDate, endDate, totalPrice, booking=true }) => (
+        {reservationList?.map(({ listingId, hostId, startDate, endDate, price, booking=true }) => (
           <ListingCard
             listingId={listingId._id}
             creator={hostId._id}
@@ -51,10 +51,11 @@ const ReservationList = () => {
             thana={listingId.thana}
             postcode={listingId.postcode}
             country={listingId.country}
+            price={listingId.price}
             category={listingId.category}
             startDate={startDate}
             endDate={endDate}
-            totalPrice={totalPrice}
+            
             booking={booking}
           />
         ))}

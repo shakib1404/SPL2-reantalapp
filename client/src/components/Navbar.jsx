@@ -32,12 +32,12 @@ const Navbar = () => {
   
 
   const checkLandlordStatus = async () => {
-    if (!user) return; // Ensure user is defined before proceeding
+    if (!user) return; 
     try {
       const response = await fetch(`http://localhost:3001/users/${user._id}/properties`);
       const data = await response.json();
 
-      // Check if the user has any properties in the propertyList of creator
+      
       const landlord = data.some(property => property.creator._id === user._id );
       setIsLandlord(landlord);
 
@@ -103,7 +103,7 @@ const Navbar = () => {
           </a>
         )}
 
-        {/* Notification Icon (for landlords only) */}
+        
         {
           <IconButton
             onClick={() => {

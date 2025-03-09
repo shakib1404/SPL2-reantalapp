@@ -108,7 +108,7 @@ const ListingDetails = () => {
         listingId,
         hostId: listing.creator._id,
         bookingDate: selectedDate.toDateString(), // Use single date
-        totalPrice: listing.price, // Single-day price
+        totalPrice: listing.price,
       };
       console.log(customerId);
       console.log(listingId);

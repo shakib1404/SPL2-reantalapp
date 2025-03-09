@@ -6,12 +6,12 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Set up multer for file uploads
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const uploadDir = path.join(__dirname, '../public/uploads');
         
-        // Create directory if it doesn't exist
+        
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
@@ -26,9 +26,9 @@ const storage = multer.diskStorage({
     }
 });
 
-// File filter to restrict file types if needed
+
 const fileFilter = (req, file, cb) => {
-    // Accept images, documents, PDFs, etc.
+   
     const allowedTypes = [
         'image/jpeg', 'image/png', 'image/gif', 'image/webp',
         'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -43,7 +43,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Configure multer with max file size of 5MB
+
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
@@ -61,7 +61,7 @@ class MessageController {
         this.router.post("/create", this.createMessage.bind(this));
         this.router.get("/inbox/:userId", this.getInbox.bind(this));
         
-        // Add new routes for file uploads
+        
         this.router.post("/upload", upload.single('file'), this.uploadFile.bind(this));
         this.router.get("/files/:filename", this.getFile.bind(this));
     }
@@ -72,21 +72,21 @@ class MessageController {
             const { listingId } = req.params;
             const { senderId, receiverId } = req.query;
 
-            // Validate the input ids
+        
             if (!mongoose.Types.ObjectId.isValid(listingId) || 
                 !mongoose.Types.ObjectId.isValid(senderId) || 
                 !mongoose.Types.ObjectId.isValid(receiverId)) {
                 return res.status(400).json({ error: "Invalid listing ID or user ID" });
             }
 
-            // Fetch messages exchanged between sender and receiver for the listing
+            
             const messages = await Message.find({
                 listingId,
                 $or: [
                     { senderId, receiverId },
                     { senderId: receiverId, receiverId: senderId }
                 ]
-            }).sort({ createdAt: 1 }); // Sort messages by timestamp in ascending order
+            }).sort({ createdAt: 1 }); 
 
             res.json(messages);
         } catch (error) {
@@ -157,19 +157,18 @@ class MessageController {
         }
     }
 
-    // Get inbox for a user - shows conversations with other users for the properties they are involved with
    
     async getInbox(req, res) {
         const { userId } = req.params;
-
+    
         try {
             const userObjectId = new mongoose.Types.ObjectId(userId);
-
+    
             const conversations = await Message.aggregate([
                 { $match: { receiverId: userObjectId } },
                 {
                     $group: {
-                        _id: "$senderId", // Group by senderId
+                        _id: "$senderId",
                         listingId: { $first: "$listingId" },
                         receiverId: { $first: "$receiverId" },
                         createdAt: { $first: "$createdAt" },
@@ -177,7 +176,19 @@ class MessageController {
                 },
                 {
                     $lookup: {
-                        from: "users", // Lookup sender info
+                        from: "listings",
+                        localField: "listingId",
+                        foreignField: "_id",
+                        as: "listingData",
+                    },
+                },
+                { $unwind: { path: "$listingData", preserveNullAndEmptyArrays: true } },
+                {
+                    $match: { "listingData._id": { $ne: null } } // Ensure listing still exists
+                },
+                {
+                    $lookup: {
+                        from: "users",
                         localField: "_id",
                         foreignField: "_id",
                         as: "senderUser",
@@ -185,7 +196,7 @@ class MessageController {
                 },
                 {
                     $lookup: {
-                        from: "users", // Lookup receiver info
+                        from: "users",
                         localField: "receiverId",
                         foreignField: "_id",
                         as: "receiverUser",
@@ -219,7 +230,7 @@ class MessageController {
                     },
                 },
             ]);
-
+    
             console.log(conversations);
             res.json(conversations);
         } catch (err) {
@@ -227,6 +238,7 @@ class MessageController {
             res.status(500).json({ error: "Failed to fetch conversations" });
         }
     }
+    
 }
 
 const messageController = new MessageController();

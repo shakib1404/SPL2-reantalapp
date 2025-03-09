@@ -17,7 +17,7 @@ class BookingController {
 
             const newBooking = new Booking({
                 customerId,
-                hostId, // Added hostId as part of the booking
+                hostId, 
                 listingId,
                 bookingDate,
                 totalPrice,
